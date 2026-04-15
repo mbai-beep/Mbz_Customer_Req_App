@@ -15,6 +15,8 @@ function mapRow(r) {
     hasVoice:     r.has_voice === 1,
     voiceDuration:r.voice_duration || '',
     photoCount:   typeof r.photo_count === 'number' ? r.photo_count : (parseInt(r.photo_count) || 0),
+    photoUrls:    JSON.parse(r.photo_urls || '[]'),
+    audioUrl:     r.audio_url || '',
     synced:       true,
   };
 }
@@ -24,7 +26,6 @@ module.exports = async function handler(req, res) {
     await ensureTable();
     const db = getDB();
 
-    /* ── GET: list entries (all, or filtered by employee) ── */
     if (req.method === 'GET') {
       const { employee } = req.query;
       let result;
@@ -39,7 +40,6 @@ module.exports = async function handler(req, res) {
       return res.json({ entries: result.rows.map(mapRow) });
     }
 
-    /* ── POST: create entry ── */
     if (req.method === 'POST') {
       const b = req.body;
       if (!b.id || !b.customerName || !b.mobileNumber || !b.storeName || !b.employee || !b.createdAt) {
@@ -48,22 +48,15 @@ module.exports = async function handler(req, res) {
       await db.execute({
         sql: `INSERT OR REPLACE INTO entries
               (id, customer_name, mobile_number, store_name, requirement, description, employee,
-               employee_id, created_at, status, has_voice, voice_duration, photo_count, synced_at)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+               employee_id, created_at, status, has_voice, voice_duration, photo_count, photo_urls, audio_url, synced_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
-          b.id,
-          b.customerName,
-          b.mobileNumber,
-          b.storeName,
-          b.requirement    || '',
-          b.description    || '',
-          b.employee,
-          b.employeeId     || '',
-          b.createdAt,
-          b.status         || 'new',
-          b.hasVoice ? 1 : 0,
-          b.voiceDuration  || '',
-          b.photoCount     || 0,
+          b.id, b.customerName, b.mobileNumber, b.storeName,
+          b.requirement || '', b.description || '', b.employee,
+          b.employeeId || '', b.createdAt, b.status || 'new',
+          b.hasVoice ? 1 : 0, b.voiceDuration || '', b.photoCount || 0,
+          b.photoUrls ? JSON.stringify(b.photoUrls) : '[]',
+          b.audioUrl || '',
           new Date().toISOString(),
         ],
       });
