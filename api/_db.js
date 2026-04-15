@@ -29,9 +29,15 @@ async function ensureTable() {
       has_voice    INTEGER DEFAULT 0,
       voice_duration TEXT DEFAULT '',
       photo_count  INTEGER DEFAULT 0,
+      photo_urls   TEXT DEFAULT '',
+      audio_url    TEXT DEFAULT '',
       synced_at    TEXT
     )
   `);
+
+  // Migration: Add columns if they don't exist (for existing tables)
+  try { await db.execute('ALTER TABLE entries ADD COLUMN photo_urls TEXT DEFAULT ""'); } catch(e) {}
+  try { await db.execute('ALTER TABLE entries ADD COLUMN audio_url TEXT DEFAULT ""'); } catch(e) {}
 }
 
 module.exports = { getDB, ensureTable };
