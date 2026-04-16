@@ -316,6 +316,10 @@ input[type="file"] { display: none; }
         <label>Store name *</label>
         <input type="text" id="custStore" placeholder="Store or branch name">
       </div>
+      <div class="field-group">
+        <label>Store Code</label>
+        <input type="text" id="custStoreCode" placeholder="Store code (optional)">
+      </div>
     </div>
     <div class="form-section">
       <div class="form-section-title">Requirement details</div>
@@ -445,7 +449,8 @@ let isRecording   = false;
 let mediaRecorder = null;
 let audioChunks   = [];
 let audioBlob     = null;
-let audioUrl      = null;
+let photoUploadUrls = []; let audioUploadUrl = '';
+      let audioUrl      = null;
 let recInterval   = null;
 let recSeconds    = 0;
 
@@ -601,6 +606,10 @@ async function loadEmployeeEntries(employee) {
   const others    = entries.filter(e => e.employee !== employee && !apiIds.has(e.id));
   entries = [...fetched, ...localOnly, ...others];
   saveEntries();
+        (async () => {
+          try { await fetch('/api/entries', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(entry)}); } catch(e) { console.warn('DB sync failed:', e); }
+          try { await fetch('/api/sheets', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entry})}); } catch(e) { console.warn('Sheets sync failed:', e); }
+        })();
   renderHome();
 }
 
@@ -681,15 +690,21 @@ function resetForm() {
   if (currentUser?.store) document.getElementById('custStore').value = currentUser.store;
 }
 
-function handlePhotos(input) {
-  Array.from(input.files).forEach(file => {
-    photos.push(file);
-    const r = new FileReader();
-    r.onload = e => { photoDataUrls.push(e.target.result); addPhotoThumb(e.target.result); };
-    r.readAsDataURL(file);
-  });
-  input.value = '';
-}
+async function handlePhotos(input) {
+        const files = Array.from(input.files);
+        photos = files;
+        photoUploadUrls = [];
+        for (const file of files) {
+          try {
+            const reader = new FileReader();
+            const b64 = await new Promise((res, rej) => { reader.onload = e => res(e.target.result); reader.onerror = rej; reader.readAsDataURL(file); });
+            const resp = await fetch('/api/upload', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({fileData: b64, fileName: file.name, mimeType: file.type || 'image/jpeg'})});
+            const data = await resp.json();
+            if (data.url) photoUploadUrls.push(data.url);
+          } catch(e) { console.warn('Drive photo upload failed:', e); }
+        }
+        updatePhotoPreview();
+      }
 
 function addPhotoThumb(src) {
   const grid = document.getElementById('photoGrid');
@@ -707,13 +722,25 @@ async function toggleVoice() {
     mediaRecorder = new MediaRecorder(stream);
     audioChunks   = [];
     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-      audioUrl  = URL.createObjectURL(audioBlob);
-      document.getElementById('playBtn').style.display = '';
-      document.getElementById('voiceBtn').classList.remove('recording');
-      document.getElementById('voiceBtn').classList.add('has-data');
-      document.getElementById('voiceBtnLabel').textContent = 'Recorded ✓';
+      const url = URL.createObjectURL(audioBlob);
+      audioPlayback.src = url;
+      audioPlayback.style.display = 'block';
+      recordBtn.textContent = 'Re-record';
+      recordBtn.disabled = false;
+      stopBtn.disabled = true;
+      try {
+        const ar = new FileReader();
+        ar.onload = async (ev) => {
+          const b64 = ev.target.result;
+          const fn = 'audio_' + Date.now() + '.webm';
+          const r = await fetch('/api/upload', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({fileData: b64, fileName: fn, mimeType: 'audio/webm'})});
+          const d = await r.json();
+          audioUploadUrl = d.url || '';
+        };
+        ar.readAsDataURL(audioBlob);
+      } catch(e) { console.warn('Drive audio upload failed:', e); audioUploadUrl = ''; }
     };
     mediaRecorder.start();
     isRecording = true; recSeconds = 0;
@@ -753,21 +780,24 @@ async function submitForm() {
   if (isRecording) stopRecording();
 
   const entry = {
-    id:            'MB' + Date.now(),
-    customerName:  name,
-    mobileNumber:  mobile,
-    storeName:     store,
-    requirement:   req,
-    description:   desc,
-    employee:      currentUser?.name || 'Unknown',
-    employeeId:    currentUser?.id   || '',
-    createdAt:     new Date().toISOString(),
-    status:        'new',
-    hasVoice:      !!audioBlob,
-    voiceDuration: audioBlob ? recSeconds + 's' : '',
-    photoCount:    photos.length,
-    synced:        false,
-  };
+          id: 'MB' + Date.now(),
+          customerName: name,
+          mobileNumber: mobile,
+          storeName: store,
+          storeCode: document.getElementById('custStoreCode') ? document.getElementById('custStoreCode').value.trim() : '',
+          requirement: desc,
+          description: desc,
+          employee: currentUser?.name || 'Unknown',
+          employeeId: currentUser?.id || '',
+          createdAt: new Date().toISOString(),
+          status: 'new',
+          hasVoice: !!audioBlob,
+          voiceDuration: audioBlob ? recSeconds + 's' : '',
+          photoCount: photos.length,
+          photoUrls: photoUploadUrls,
+          audioUrl: audioUploadUrl,
+          synced: false,
+        };
 
   entries.push(entry);
   saveEntries();
@@ -910,26 +940,29 @@ function viewMgrEntry(id) {
 }
 
 function exportCSV() {
-  const headers = ['ID','Customer Name','Mobile','Store','Requirement','Description','Employee','Employee ID','Date','Status','Voice Note','Voice Duration','Photo Count','Synced'];
-  const rows = entries.map(e => [
-    e.id, `"${(e.customerName || '').replace(/"/g, '""')}"`, e.mobileNumber,
-    `"${(e.storeName    || '').replace(/"/g, '""')}"`,
-    `"${(e.requirement  || '').replace(/"/g, '""')}"`,
-    `"${(e.description  || '').replace(/"/g, '""')}"`,
-    e.employee, e.employeeId || '',
-    formatFull(new Date(e.createdAt)),
-    e.status || 'new', e.hasVoice ? 'Yes' : 'No',
-    e.voiceDuration || '', e.photoCount || 0,
-    e.synced ? 'Yes' : 'No',
-  ]);
-  const csv  = [headers, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = 'MB_Customer_Requirements.csv';
-  a.click();
-  showToast('Exported: MB_Customer_Requirements.csv', 'success');
-}
+      if (!allEntries.length) { alert('No entries to export'); return; }
+      const headers = ['ID','Date','Customer Name','Mobile','Store Name','Store Code','Requirement','Employee','Status','Photos','Photo URLs','Audio URL','Voice Duration'];
+      const rows = allEntries.map(e => [
+        e.id,
+        new Date(e.createdAt).toLocaleString(),
+        e.customerName,
+        e.mobileNumber,
+        e.storeName,
+        e.storeCode || '',
+        (e.requirement || e.description || '').replace(/,/g,'；'),
+        e.employee,
+        e.status,
+        e.photoCount || 0,
+        (Array.isArray(e.photoUrls) ? e.photoUrls : []).join(' | '),
+        e.audioUrl || '',
+        e.voiceDuration || '',
+      ]);
+      const csv = [headers, ...rows].map(r => r.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'mb_requirements_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
+    }
 
 // ════════════════════════════════════════
 // UTILS
