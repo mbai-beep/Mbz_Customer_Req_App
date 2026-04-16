@@ -38,6 +38,7 @@ module.exports = async function handler(req, res) {
     bufferStream.push(buffer);
     bufferStream.push(null);
 
+    // supportsAllDrives: true handles shared/team drives
     const uploadRes = await drive.files.create({
       requestBody: {
         name: fileName,
@@ -49,6 +50,7 @@ module.exports = async function handler(req, res) {
         body: bufferStream,
       },
       fields: 'id',
+      supportsAllDrives: true,
     });
 
     const fileId = uploadRes.data.id;
@@ -56,6 +58,7 @@ module.exports = async function handler(req, res) {
     await drive.permissions.create({
       fileId: fileId,
       requestBody: { role: 'reader', type: 'anyone' },
+      supportsAllDrives: true,
     });
 
     const url = `https://drive.google.com/uc?id=${fileId}&export=view`;
