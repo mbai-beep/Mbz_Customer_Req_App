@@ -12,8 +12,15 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Missing entry' });
     }
 
-    // Parse service account JSON from env var
-    const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    // Parse service account - handle literal newlines in Vercel env vars
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    } catch (e) {
+      serviceAccount = JSON.parse(
+        process.env.GOOGLE_SERVICE_ACCOUNT.replace(/\n/g, '\\n').replace(/\r/g, '')
+      );
+    }
 
     const auth = new google.auth.GoogleAuth({
       credentials: serviceAccount,
@@ -23,7 +30,6 @@ module.exports = async function handler(req, res) {
     const sheets = google.sheets({ version: 'v4', auth });
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
-    // Check if header row already exists
     const checkRes = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: 'Sheet1!A1:A1',
@@ -62,9 +68,7 @@ module.exports = async function handler(req, res) {
       range: 'Sheet1!A1',
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
-      requestBody: {
-        values: valuesToAppend,
-      },
+      requestBody: { values: valuesToAppend },
     });
 
     return res.status(200).json({ success: true });
