@@ -13,12 +13,18 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Missing fileData or fileName' });
     }
 
-    // Strip base64 data URI prefix: "data:image/jpeg;base64,XXX" -> "XXX"
     const base64Data = fileData.includes(',') ? fileData.split(',')[1] : fileData;
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // Parse service account JSON from env var
-    const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    // Parse service account - handle literal newlines in Vercel env vars
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
+    } catch (e) {
+      serviceAccount = JSON.parse(
+        process.env.GOOGLE_SERVICE_ACCOUNT.replace(/\n/g, '\\n').replace(/\r/g, '')
+      );
+    }
 
     const auth = new google.auth.GoogleAuth({
       credentials: serviceAccount,
@@ -28,12 +34,10 @@ module.exports = async function handler(req, res) {
     const drive = google.drive({ version: 'v3', auth });
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
-    // Create a readable stream from the buffer
     const bufferStream = new Readable();
     bufferStream.push(buffer);
     bufferStream.push(null);
 
-    // Upload file to Google Drive
     const uploadRes = await drive.files.create({
       requestBody: {
         name: fileName,
@@ -49,13 +53,9 @@ module.exports = async function handler(req, res) {
 
     const fileId = uploadRes.data.id;
 
-    // Make the file publicly readable
     await drive.permissions.create({
       fileId: fileId,
-      requestBody: {
-        role: 'reader',
-        type: 'anyone',
-      },
+      requestBody: { role: 'reader', type: 'anyone' },
     });
 
     const url = `https://drive.google.com/uc?id=${fileId}&export=view`;
