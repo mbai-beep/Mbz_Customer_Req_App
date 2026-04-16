@@ -455,6 +455,14 @@ let recInterval   = null;
 let recSeconds    = 0;
 
 // ── POST one entry to the database ──
+function toIST(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  const istMs = d.getTime() + (5.5 * 60 * 60 * 1000);
+  const ist = new Date(istMs);
+  const pad = n => String(n).padStart(2, '0');
+  return ist.getUTCFullYear() + '-' + pad(ist.getUTCMonth()+1) + '-' + pad(ist.getUTCDate()) + ' ' + pad(ist.getUTCHours()) + ':' + pad(ist.getUTCMinutes()) + ':' + pad(ist.getUTCSeconds());
+}
+
 async function syncToAPI(entry) {
   try {
     const res  = await fetch('/api/entries', {
@@ -781,7 +789,7 @@ async function submitForm() {
   const req    = document.getElementById('reqTitle').value.trim();
   const desc   = document.getElementById('reqDesc').value.trim();
   if (!name || !mobile || !store || !req) { showToast('Please fill in name, mobile, store & requirement', 'error'); return; }
-  if (isRecording) stopRecording();
+  if (isRecording) { stopRecording(); await new Promise(r => setTimeout(r, 300)); }
   await audioUploadPromise;
 
   const entry = {
@@ -794,7 +802,7 @@ async function submitForm() {
           description: desc,
           employee: currentUser?.name || 'Unknown',
           employeeId: currentUser?.id || '',
-          createdAt: new Date().toISOString(),
+          createdAt: toIST(new Date()),
           status: 'new',
           hasVoice: !!audioBlob,
           voiceDuration: audioBlob ? recSeconds + 's' : '',
@@ -946,11 +954,11 @@ function viewMgrEntry(id) {
 }
 
 function exportCSV() {
-      if (!allEntries.length) { alert('No entries to export'); return; }
+      if (!entries.length) { alert('No entries to export'); return; }
       const headers = ['ID','Date','Customer Name','Mobile','Store Name','Store Code','Requirement','Employee','Status','Photos','Photo URLs','Audio URL','Voice Duration'];
-      const rows = allEntries.map(e => [
+      const rows = entries.map(e => [
         e.id,
-        new Date(e.createdAt).toLocaleString(),
+        e.createdAt,
         e.customerName,
         e.mobileNumber,
         e.storeName,
@@ -966,7 +974,7 @@ function exportCSV() {
       const csv = [headers, ...rows].map(r => r.map(v => '"' + String(v||'').replace(/"/g,'""') + '"').join(',')).join('\n');
       const a = document.createElement('a');
       a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-      a.download = 'mb_requirements_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.download = 'mb_requirements_' + toIST(new Date()).slice(0,10) + '.csv';
       a.click();
     }
 
