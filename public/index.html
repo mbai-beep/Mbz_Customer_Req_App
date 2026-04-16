@@ -194,7 +194,7 @@ input[type="file"] { display: none; }
 <body>
 
 <div class="photo-fullscreen" id="photoFullscreen" onclick="closeFullscreen()">
-  <button class="photo-close">Ã¢ÂÂ</button>
+  <button class="photo-close">✕</button>
   <img id="fullscreenImg" src="" alt="">
 </div>
 <div class="toast" id="toast"></div>
@@ -205,7 +205,7 @@ input[type="file"] { display: none; }
 <input type="file" id="cameraInput" accept="image/*" capture="environment" multiple onchange="handlePhotos(this)">
 <input type="file" id="galleryInput" accept="image/*" multiple onchange="handlePhotos(this)">
 
-<!-- Ã¢ÂÂÃ¢ÂÂ SCREEN 1: LOGIN Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ══ SCREEN 1: LOGIN ══ -->
 <div class="screen active" id="s-login">
   <div style="text-align:center;margin-bottom:20px;">
     <div class="login-logo">
@@ -226,10 +226,10 @@ input[type="file"] { display: none; }
       <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.03em;">Sign in as</div>
       <div class="role-selector">
         <button class="role-btn active" id="role-emp" onclick="selectRole('employee')">
-          <div style="font-size:18px;margin-bottom:2px;">Ã°ÂÂÂ¤</div>Employee
+          <div style="font-size:18px;margin-bottom:2px;">👤</div>Employee
         </button>
         <button class="role-btn" id="role-mgr" onclick="selectRole('manager')">
-          <div style="font-size:18px;margin-bottom:2px;">Ã°ÂÂÂ</div>Manager
+          <div style="font-size:18px;margin-bottom:2px;">👑</div>Manager
         </button>
       </div>
     </div>
@@ -249,7 +249,7 @@ input[type="file"] { display: none; }
   </div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ SCREEN 2: EMPLOYEE HOME Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ══ SCREEN 2: EMPLOYEE HOME ══ -->
 <div class="screen" id="s-home">
   <div class="topbar">
     <div>
@@ -290,7 +290,7 @@ input[type="file"] { display: none; }
   </nav>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ SCREEN 3: CAPTURE FORM Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ══ SCREEN 3: CAPTURE FORM ══ -->
 <div class="screen" id="s-capture">
   <div class="topbar">
     <div>
@@ -375,7 +375,7 @@ input[type="file"] { display: none; }
   </div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ SCREEN 4: DETAIL Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ══ SCREEN 4: DETAIL ══ -->
 <div class="screen" id="s-detail">
   <div class="topbar">
     <div>
@@ -390,7 +390,7 @@ input[type="file"] { display: none; }
   <div class="detail-body" id="detailBody"></div>
 </div>
 
-<!-- Ã¢ÂÂÃ¢ÂÂ SCREEN 5: MANAGER Ã¢ÂÂÃ¢ÂÂ -->
+<!-- ══ SCREEN 5: MANAGER ══ -->
 <div class="screen" id="s-manager">
   <div class="manager-topbar">
     <div>
@@ -431,9 +431,9 @@ input[type="file"] { display: none; }
 </div>
 
 <script>
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // TURSO DATABASE INTEGRATION
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 const ENTRIES_KEY = 'mb_entries';
 const USER_KEY    = 'mb_user';
 
@@ -454,7 +454,7 @@ let photoUploadUrls = []; let audioUploadUrl = ''; let audioUploadPromise = Prom
 let recInterval   = null;
 let recSeconds    = 0;
 
-// Ã¢ÂÂÃ¢ÂÂ POST one entry to the database Ã¢ÂÂÃ¢ÂÂ
+// ── POST one entry to the database ──
 async function syncToAPI(entry) {
   try {
     const res  = await fetch('/api/entries', {
@@ -469,7 +469,7 @@ async function syncToAPI(entry) {
   }
 }
 
-// Ã¢ÂÂÃ¢ÂÂ GET entries from the database (all, or by employee) Ã¢ÂÂÃ¢ÂÂ
+// ── GET entries from the database (all, or by employee) ──
 async function fetchFromAPI(employee) {
   const url = employee
     ? `/api/entries?employee=${encodeURIComponent(employee)}`
@@ -485,7 +485,7 @@ async function fetchFromAPI(employee) {
   }
 }
 
-// Ã¢ÂÂÃ¢ÂÂ PATCH status change Ã¢ÂÂÃ¢ÂÂ
+// ── PATCH status change ──
 async function patchStatus(id, status) {
   try {
     await fetch(`/api/entries/${id}`, {
@@ -493,10 +493,10 @@ async function patchStatus(id, status) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ status }),
     });
-  } catch (e) { /* silent Ã¢ÂÂ local state already updated */ }
+  } catch (e) { /* silent – local state already updated */ }
 }
 
-// Ã¢ÂÂÃ¢ÂÂ Update connection indicator across all screens Ã¢ÂÂÃ¢ÂÂ
+// ── Update connection indicator across all screens ──
 function updateSyncStatus(connected) {
   dbConnected = connected;
   const color = connected ? '#1D9E75' : '#E24B4A';
@@ -511,7 +511,7 @@ function updateSyncStatus(connected) {
   });
 }
 
-// Ã¢ÂÂÃ¢ÂÂ Ping the API to check reachability Ã¢ÂÂÃ¢ÂÂ
+// ── Ping the API to check reachability ──
 async function checkAPIConnection() {
   try {
     const ctrl = new AbortController();
@@ -524,9 +524,9 @@ async function checkAPIConnection() {
   }
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // APP STATE & NAVIGATION
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function init() {
   entries = JSON.parse(localStorage.getItem(ENTRIES_KEY) || '[]');
   updateSyncStatus(false);
@@ -557,9 +557,9 @@ function goBack() {
   if (prev === 's-manager') renderManager();
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // AUTH
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function selectRole(role) {
   currentRole = role;
   document.getElementById('role-emp').classList.toggle('active', role === 'employee');
@@ -596,7 +596,7 @@ function doLogout() {
   currentScreen = 's-login';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ Load this employee's entries from the database Ã¢ÂÂÃ¢ÂÂ
+// ── Load this employee's entries from the database ──
 async function loadEmployeeEntries(employee) {
   const fetched = await fetchFromAPI(employee);
   if (fetched === null) return;
@@ -610,7 +610,7 @@ async function loadEmployeeEntries(employee) {
   renderHome();
 }
 
-// Ã¢ÂÂÃ¢ÂÂ Reload all entries into the manager view Ã¢ÂÂÃ¢ÂÂ
+// ── Reload all entries into the manager view ──
 async function refreshManagerData() {
   showLoading('Fetching from database...');
   const fetched = await fetchFromAPI();
@@ -621,12 +621,12 @@ async function refreshManagerData() {
   entries = [...fetched, ...pendingLocal];
   saveEntries();
   renderManager();
-  if (fetched.length > 0) showToast('Synced from database Ã¢ÂÂ', 'success');
+  if (fetched.length > 0) showToast('Synced from database ✓', 'success');
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // HOME
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function renderHome() {
   const now       = new Date();
   const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
@@ -641,7 +641,7 @@ function renderHome() {
 
   const list = document.getElementById('entriesList');
   if (myEntries.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">Ã°ÂÂÂ</div><div class="empty-title">No entries yet</div><div class="empty-sub">Tap + to capture your first customer requirement</div></div>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No entries yet</div><div class="empty-sub">Tap + to capture your first customer requirement</div></div>';
     return;
   }
   list.innerHTML = myEntries.slice().reverse().map(e => {
@@ -657,20 +657,20 @@ function renderHome() {
       <div class="req-meta">
         <span class="badge badge-${e.status || 'new'}">${capitalize(e.status || 'new')}</span>
         <div class="media-pills">
-          ${e.hasVoice ? '<span class="media-pill pill-voice">Ã°ÂÂÂ¤</span>' : ''}
-          ${(e.photoCount || 0) > 0 ? `<span class="media-pill pill-photo">Ã°ÂÂÂ·${e.photoCount}</span>` : ''}
+          ${e.hasVoice ? '<span class="media-pill pill-voice">🎤</span>' : ''}
+          ${(e.photoCount || 0) > 0 ? `<span class="media-pill pill-photo">📷${e.photoCount}</span>` : ''}
           ${e.synced
-            ? '<span style="font-size:10px;color:var(--green);">Ã¢ÂÂ</span>'
-            : '<span style="font-size:10px;color:var(--text3);">Ã¢ÂÂ³</span>'}
+            ? '<span style="font-size:10px;color:var(--green);">✓</span>'
+            : '<span style="font-size:10px;color:var(--text3);">⏳</span>'}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // CAPTURE + SYNC
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function resetForm() {
   ['custName', 'custMobile', 'custStore', 'reqTitle', 'reqDesc'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -815,17 +815,17 @@ async function submitForm() {
     try { await fetch('/api/sheets', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({entry})}); } catch(e) { console.warn('Sheets sync failed:', e); }
     entry.synced = true;
     saveEntries();
-    showToast('Saved to database Ã¢ÂÂ', 'success');
+    showToast('Saved to database ✓', 'success');
   } else {
-    showToast('Saved locally Ã¢ÂÂ will retry sync', 'error');
+    showToast('Saved locally — will retry sync', 'error');
   }
 
   setTimeout(() => goBack(), 1000);
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // DETAIL VIEW
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function viewEntry(id) {
   const e = entries.find(x => x.id === id);
   if (!e) return;
@@ -843,12 +843,12 @@ function viewEntry(id) {
         </div>
       </div>
       <div class="detail-row"><span class="detail-key">Mobile</span><span class="detail-val">${esc(e.mobileNumber)}</span></div>
-      <div class="detail-row"><span class="detail-key">Requirement</span><span class="detail-val" style="color:var(--green);font-weight:600;">${esc(e.requirement || 'Ã¢ÂÂ')}</span></div>
+      <div class="detail-row"><span class="detail-key">Requirement</span><span class="detail-val" style="color:var(--green);font-weight:600;">${esc(e.requirement || '—')}</span></div>
       <div class="detail-row"><span class="detail-key">Recorded by</span><span class="detail-val">${esc(e.employee)}</span></div>
       <div class="detail-row"><span class="detail-key">Date &amp; time</span><span class="detail-val">${formatFull(new Date(e.createdAt))}</span></div>
       <div class="detail-row"><span class="detail-key">DB sync</span>
         <span class="detail-val" style="color:${e.synced ? 'var(--green)' : 'var(--amber)'}">
-          ${e.synced ? 'Ã¢ÂÂ Synced' : 'Ã¢ÂÂ³ Pending'}
+          ${e.synced ? '✓ Synced' : '⏳ Pending'}
         </span>
       </div>
       <div class="detail-row"><span class="detail-key">Status</span>
@@ -869,7 +869,7 @@ function viewEntry(id) {
       </div></div>` : ''}
     ${(e.photoCount || 0) > 0 ? `<div class="detail-section"><div class="detail-section-title">Photographs (${e.photoCount})</div>
       <div class="photo-gallery">${Array(e.photoCount).fill(0).map(() =>
-        `<div class="gallery-img"><div style="width:100%;aspect-ratio:1;background:#e0f5ec;display:flex;align-items:center;justify-content:center;font-size:24px;">Ã°ÂÂÂ¼Ã¯Â¸Â</div></div>`
+        `<div class="gallery-img"><div style="width:100%;aspect-ratio:1;background:#e0f5ec;display:flex;align-items:center;justify-content:center;font-size:24px;">🖼️</div></div>`
       ).join('')}</div></div>` : ''}
   `;
   goTo('s-detail');
@@ -885,9 +885,9 @@ async function updateStatus(id, status) {
   }
 }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // MANAGER
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function renderManager() {
   const now        = new Date();
   const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
@@ -902,7 +902,7 @@ function renderManager() {
 function renderMgrList(list) {
   const el = document.getElementById('mgrList');
   if (list.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">Ã°ÂÂÂ</div><div class="empty-title">No entries</div><div class="empty-sub">Tap Refresh to load from database</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No entries</div><div class="empty-sub">Tap Refresh to load from database</div></div>';
     return;
   }
   el.innerHTML = list.slice().reverse().map(e => {
@@ -919,7 +919,7 @@ function renderMgrList(list) {
       <div class="req-meta">
         <span class="badge badge-${e.status || 'new'}">${capitalize(e.status || 'new')}</span>
         <span style="font-size:10px;color:${e.synced ? 'var(--green)' : 'var(--text3)'}">
-          ${e.synced ? 'Ã¢ÂÂ Synced' : 'local'}
+          ${e.synced ? '✓ Synced' : 'local'}
         </span>
       </div>
     </div>`;
@@ -955,7 +955,7 @@ function exportCSV() {
         e.mobileNumber,
         e.storeName,
         e.storeCode || '',
-        (e.requirement || e.description || '').replace(/,/g,'Ã¯Â¼Â'),
+        (e.requirement || e.description || '').replace(/,/g,'；'),
         e.employee,
         e.status,
         e.photoCount || 0,
@@ -970,9 +970,9 @@ function exportCSV() {
       a.click();
     }
 
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 // UTILS
-// Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ════════════════════════════════════════
 function showLoading(msg = 'Loading...') {
   document.getElementById('loadingText').textContent = msg;
   document.getElementById('loadingOverlay').classList.add('show');
