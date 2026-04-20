@@ -4,14 +4,22 @@ const path = require('path');
 const fs = require('fs');
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
   const sec = (req.query || {}).secret || '';
   if (sec !== 'mb-admin-seed-2024') return res.status(403).json({ error: 'Forbidden' });
   try {
     await ensureTable();
     const db = getDB();
-    const dataPath = path.join(process.cwd(), 'data', 'employees.json');
-    const raw = fs.readFileSync(dataPath, 'utf8');
-    const employees = JSON.parse(raw);
+    let employees;
+    if (req.method === 'POST' && req.body && Array.isArray(req.body)) {
+      employees = req.body;
+    } else {
+      const dataPath = path.join(process.cwd(), 'data', 'employees.json');
+      const raw = fs.readFileSync(dataPath, 'utf8');
+      employees = JSON.parse(raw);
+    }
     let inserted = 0, errors = 0;
     const BATCH = 20, ROUNDS = 6;
     for (let i = 0; i < employees.length; i += BATCH) {
