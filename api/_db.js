@@ -1,16 +1,14 @@
 const { createClient } = require('@libsql/client');
-
 let db;
 function getDB() {
   if (!db) {
     db = createClient({
-      url: process.env.TURSO_URL || process.env.DATABASE_URL,
-      authToken: process.env.TURSO_TOKEN || process.env.DATABASE_AUTH_TOKEN
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN
     });
   }
   return db;
 }
-
 async function ensureTable() {
   const d = getDB();
   await d.execute(`CREATE TABLE IF NOT EXISTS entries (
@@ -29,5 +27,4 @@ async function ensureTable() {
     password_hash TEXT
   )`);
 }
-
 module.exports = { getDB, ensureTable };
