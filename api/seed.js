@@ -1,19 +1,40 @@
-const path=require('path'),fs=require('fs');
-module.exports=async function(req,res){
-  const q=(req.query||{});
-  if(q.secret!=='mb-admin-seed-2024') return res.status(403).json({error:'Forbidden'});
-  const info={cwd:process.cwd(),dirname:__dirname,nodeVer:process.version};
-  try{
-    const dp=path.join(process.cwd(),'data','employees.json');
-    info.dataPathExists=fs.existsSync(dp);
-    info.dataDir=fs.existsSync(path.join(process.cwd(),'data'))?fs.readdirSync(path.join(process.cwd(),'data')).join(','):'no data dir';
-    if(info.dataPathExists){const raw=fs.readFileSync(dp,'utf8');const emp=JSON.parse(raw);info.empCount=emp.length;info.first=emp[0]&&emp[0].emp_code;}
-  }catch(e){info.fileError=e.message;}
-  try{
-    const {createClient}=require('@libsql/client');
-    const envKeys=Object.keys(process.env).filter(k=>k.includes('TURSO')||k.includes('DATABASE')||k.includes('LIBSQL'));
-    info.envKeys=envKeys;
-    info.dbUrl=process.env.TURSO_DATABASE_URL||process.env.TURSO_URL||process.env.DATABASE_URL||'NOT_FOUND';
-  }catch(e){info.dbModErr=e.message;}
-  return res.json(info);
+const { getDB, ensureTable } = require('./_db');
+const bcrypt = require('bcryptjs');
+const path = require('path');
+const fs = require('fs');
+module.exports = async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const sec = (req.query || {}).secret || '';
+  if (sec !== 'mb-admin-seed-2024') return res.status(403).json({ error: 'Forbidden' });
+  try {
+    await ensureTable();
+    const db = getDB();
+    const dataPath = path.join(process.cwd(), 'data', 'employees.json');
+    const raw = fs.readFileSync(dataPath, 'utf8');
+    const employees = JSON.parse(raw);
+    let inserted = 0, errors = 0;
+    const BATCH = 20, ROUNDS = 6;
+    for (let i = 0; i < employees.length; i += BATCH) {
+      const batch = employees.slice(i, i + BATCH);
+      await Promise.all(batch.map(async (emp) => {
+        try {
+          const hash = await bcrypt.hash('MB@' + emp.emp_code, ROUNDS);
+          await db.execute({
+            sql: `INSERT OR REPLACE INTO employees
+              (emp_code,emp_name,emp_mobile,emp_designation,hod,
+               store_code,store_name,store_locality,city,state,
+               store_status,role,password_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            args: [emp.emp_code, emp.emp_name||'', emp.emp_mobile||'',
+              emp.emp_designation||'', emp.hod||'', emp.store_code||'',
+              emp.store_name||'', emp.store_locality||'', emp.city||'',
+              emp.state||'', emp.store_status||'Active', emp.role||'employee', hash]
+          });
+          inserted++;
+        } catch(e) { errors++; }
+      }));
+    }
+    return res.json({ success: true, inserted, errors, total: employees.length });
+  } catch(e) {
+    return res.status(500).json({ error: e.message });
+  }
 };
