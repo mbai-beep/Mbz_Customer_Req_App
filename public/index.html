@@ -890,34 +890,42 @@ function esc(s) {
 </script>
 
      <style>
-/* ── MEENA BAZAAR BRAND THEME ── */
-/* Red:#C61E32 | Yellow:#FDD32C | Green:#CCD96F | BG:#EAE7DB */
+/* ── MEENA BAZAAR BRAND THEME v4 ── */
+/* Header/Hero: #FDD32C (Yellow) | Buttons: #CCD96F (Lime Green) */
+/* Red #C61E32 only for Forgot Password link | BG: #EAE7DB */
 body { background: #EAE7DB !important; }
-.app-header,
-.login-hero { background: linear-gradient(135deg,#C61E32,#9e1828) !important; }
+.app-header { background: #FDD32C !important; color: #333333 !important; }
+.app-header .title,
+.app-header .subtitle { color: #333333 !important; }
+.login-hero { background: #FDD32C !important; color: #333333 !important; }
+.login-hero h1,
+.login-hero p { color: #333333 !important; }
 .btn-primary {
-  background: #C61E32 !important;
-  color: #fff !important;
-  border-bottom: 3px solid #FDD32C !important;
+  background: #CCD96F !important;
+  color: #333333 !important;
+  font-weight: 700 !important;
+  border: none !important;
+  box-shadow: 0 3px 0 #a8b84a !important;
 }
-.btn-primary:hover { background: #9e1828 !important; }
-.btn-primary:active { transform: scale(.97); }
+.btn-primary:hover { background: #b8c55a !important; }
+.btn-primary:active { transform: translateY(2px); box-shadow: none !important; }
 .login-card h2,
 .forgot-card h2,
 .modal h3,
 .card-title,
-.req-summary strong,
-.link-btn:hover { color: #C61E32 !important; }
+.req-summary strong { color: #333333 !important; }
+.link-btn { color: #C61E32 !important; }
+.link-btn:hover { color: #9e1828 !important; text-decoration: underline !important; }
 .field input:focus,
 .field select:focus,
-.field textarea:focus { border-color: #C61E32 !important; box-shadow: 0 0 0 2px rgba(198,30,50,.15) !important; }
-.status-fulfilled { background: #f0f5d0 !important; color: #3a5000 !important; border-color: #CCD96F !important; }
-.req-section-header { background: #CCD96F !important; color: #333333 !important; }
-.bottom-nav { background: linear-gradient(135deg,#C61E32,#9e1828) !important; }
-.bottom-nav .nav-btn.active,
-.bottom-nav .nav-btn:hover { color: #FDD32C !important; }
-.login-card { border-top: 4px solid #FDD32C !important; }
-.page-tabs .tab-btn.active { border-bottom-color: #C61E32 !important; color: #C61E32 !important; }
+.field textarea:focus { border-color: #b8c55a !important; box-shadow: 0 0 0 2px rgba(204,217,111,.3) !important; }
+.status-fulfilled { background: #f5fae0 !important; color: #4a6000 !important; border-color: #CCD96F !important; }
+.req-section-header { background: #FDD32C !important; color: #333333 !important; }
+.bottom-nav { background: #FDD32C !important; border-top: 2px solid #e6bd00 !important; }
+.bottom-nav .nav-btn { color: #555 !important; }
+.bottom-nav .nav-btn.active { color: #C61E32 !important; }
+.page-tabs .tab-btn.active { border-bottom-color: #CCD96F !important; color: #333333 !important; }
+.login-card { border-top: 3px solid #b8c55a !important; }
      </style>
 </body>
 </html>
