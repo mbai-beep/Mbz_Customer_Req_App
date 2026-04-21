@@ -47,6 +47,18 @@ async function getSheetsClient() {
     return null;
   }
 }
+function toIST(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
+  const dd = String(ist.getUTCDate()).padStart(2, '0');
+  const mm = String(ist.getUTCMonth() + 1).padStart(2, '0');
+  const yyyy = ist.getUTCFullYear();
+  const hh = String(ist.getUTCHours()).padStart(2, '0');
+  const mi = String(ist.getUTCMinutes()).padStart(2, '0');
+  const ss = String(ist.getUTCSeconds()).padStart(2, '0');
+  return dd + '-' + mm + '-' + yyyy + ' ' + hh + ':' + mi + ':' + ss;
+}
 
 async function appendToSheet(entry) {
   const sheets = await getSheetsClient();
@@ -57,7 +69,7 @@ async function appendToSheet(entry) {
       : entry.requirement;
     const row = [
       entry.id, entry.customerName, entry.mobileNumber, entry.storeName, entry.storeCode,
-      req, entry.description, entry.employee, entry.employeeId, entry.createdAt,
+      req, entry.description, entry.employee, entry.employeeId, toIST(entry.createdAt),
       'Pending', entry.hasVoice ? 'Yes' : 'No', entry.voiceDuration,
       entry.photoCount, (entry.photoUrls||[]).join(', '), entry.audioUrl,
       new Date().toISOString(), entry.submittedBy || ''
