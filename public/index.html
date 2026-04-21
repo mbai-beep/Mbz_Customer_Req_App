@@ -891,28 +891,33 @@ function esc(s) {
 
      <style>
 /* ── MEENA BAZAAR BRAND THEME ── */
-/* Primary Red: #CC1B2C  |  Gold: #FFB300 */
-body { background: #fff5f0 !important; }
+/* Red:#C61E32 | Yellow:#FDD32C | Green:#CCD96F | BG:#EAE7DB */
+body { background: #EAE7DB !important; }
 .app-header,
-.login-hero { background: linear-gradient(135deg,#CC1B2C,#a8151f) !important; }
-.btn-primary { background: linear-gradient(135deg,#CC1B2C,#FFB300) !important; color:#fff !important; }
-.btn-primary:hover { background: linear-gradient(135deg,#a8151f,#e6a000) !important; }
+.login-hero { background: linear-gradient(135deg,#C61E32,#9e1828) !important; }
+.btn-primary {
+  background: #C61E32 !important;
+  color: #fff !important;
+  border-bottom: 3px solid #FDD32C !important;
+}
+.btn-primary:hover { background: #9e1828 !important; }
 .btn-primary:active { transform: scale(.97); }
 .login-card h2,
 .forgot-card h2,
 .modal h3,
 .card-title,
-.req-section-header,
 .req-summary strong,
-.link-btn:hover { color: #CC1B2C !important; }
+.link-btn:hover { color: #C61E32 !important; }
 .field input:focus,
 .field select:focus,
-.field textarea:focus { border-color: #CC1B2C !important; }
-.status-fulfilled { background: #fff8e1 !important; color: #a8151f !important; border-color: #FFD54F !important; }
-.req-section-header { background: #fff8e1 !important; color: #CC1B2C !important; }
-.bottom-nav { background: linear-gradient(135deg,#CC1B2C,#a8151f) !important; }
+.field textarea:focus { border-color: #C61E32 !important; box-shadow: 0 0 0 2px rgba(198,30,50,.15) !important; }
+.status-fulfilled { background: #f0f5d0 !important; color: #3a5000 !important; border-color: #CCD96F !important; }
+.req-section-header { background: #CCD96F !important; color: #333333 !important; }
+.bottom-nav { background: linear-gradient(135deg,#C61E32,#9e1828) !important; }
 .bottom-nav .nav-btn.active,
-.bottom-nav .nav-btn:hover { color: #FFB300 !important; }
+.bottom-nav .nav-btn:hover { color: #FDD32C !important; }
+.login-card { border-top: 4px solid #FDD32C !important; }
+.page-tabs .tab-btn.active { border-bottom-color: #C61E32 !important; color: #C61E32 !important; }
      </style>
 </body>
 </html>
