@@ -60,6 +60,18 @@ function toIST(dateStr) {
   return dd + '-' + mm + '-' + yyyy + ' ' + hh + ':' + mi + ':' + ss;
 }
 
+function nowIST() {
+  const d = new Date();
+  const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
+  const dd = String(ist.getUTCDate()).padStart(2, '0');
+  const mm = String(ist.getUTCMonth() + 1).padStart(2, '0');
+  const yyyy = ist.getUTCFullYear();
+  const hh = String(ist.getUTCHours()).padStart(2, '0');
+  const mi = String(ist.getUTCMinutes()).padStart(2, '0');
+  const ss = String(ist.getUTCSeconds()).padStart(2, '0');
+  return dd + '-' + mm + '-' + yyyy + ' ' + hh + ':' + mi + ':' + ss;
+}
+
 async function appendToSheet(entry) {
   const sheets = await getSheetsClient();
   if (!sheets) return;
@@ -115,7 +127,7 @@ module.exports = async function handler(req, res) {
       args: [
         b.id, b.customerName, b.mobileNumber, b.storeName,
         b.storeCode || '', b.requirement || '', b.description || '',
-        b.employee, b.employeeId || '', b.createdAt,
+        b.employee, b.employeeId || '', nowIST(),
         b.status || 'new', b.hasVoice ? 1 : 0,
         b.voiceDuration || '', b.photoCount || 0,
         photoUrlsJson, b.audioUrl || '', new Date().toISOString(),
