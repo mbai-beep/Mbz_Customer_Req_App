@@ -16,37 +16,45 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Body must be array of employees' });
   }
 
-  try {
-    await ensureTable();
-  } catch(e) {
+  try { await ensureTable(); } catch(e) {
     return res.status(500).json({ error: 'ensureTable failed: ' + e.message });
   }
 
   const db = getDB();
-  let inserted = 0, skipped = 0, errors = 0;
-  let firstError = null;
+  try {
+    // 1. Batch insert all employees in one call
+    const empStatements = EMPLOYEES.map(emp => ({
+      sql: `INSERT OR REPLACE INTO employees (emp_code, emp_name, emp_mobile, emp_designation, hod, store_code, store_name, store_locality, city, state, store_status, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [emp.emp_code, emp.emp_name, emp.emp_mobile, emp.emp_designation, emp.hod, emp.store_code, emp.store_name, emp.store_locality, emp.city, emp.state, emp.store_status, emp.role]
+    }));
+    await db.batch(empStatements, 'write');
 
-  for (const emp of EMPLOYEES) {
-    try {
-      await db.execute({
-        sql: `INSERT OR REPLACE INTO employees (emp_code, emp_name, emp_mobile, emp_designation, hod, store_code, store_name, store_locality, city, state, store_status, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [emp.emp_code, emp.emp_name, emp.emp_mobile, emp.emp_designation, emp.hod, emp.store_code, emp.store_name, emp.store_locality, emp.city, emp.state, emp.store_status, emp.role]
-      });
-      const existing = await db.execute({ sql: 'SELECT emp_code FROM employee_auth WHERE emp_code = ?', args: [emp.emp_code] });
-      if (!existing.rows.length) {
-        const hash = await bcrypt.hash('MB@' + emp.emp_code, 6);
-        await db.execute({
-          sql: 'INSERT INTO employee_auth (emp_code, password_hash, is_first_login) VALUES (?, ?, 1)',
-          args: [emp.emp_code, hash]
-        });
-        inserted++;
-      } else {
-        skipped++;
-      }
-    } catch(e) {
-      if (!firstError) firstError = 'emp ' + emp.emp_code + ': ' + e.message;
-      errors++;
+    // 2. Find which ones already have auth in one query
+    const empCodes = EMPLOYEES.map(e => e.emp_code);
+    const placeholders = empCodes.map(() => '?').join(',');
+    const existing = await db.execute({
+      sql: `SELECT emp_code FROM employee_auth WHERE emp_code IN (${placeholders})`,
+      args: empCodes
+    });
+    const existingSet = new Set(existing.rows.map(r => Number(r.emp_code)));
+    const newEmps = EMPLOYEES.filter(e => !existingSet.has(Number(e.emp_code)));
+
+    // 3. Hash all new passwords in parallel
+    const hashes = await Promise.all(
+      newEmps.map(emp => bcrypt.hash('MB@' + emp.emp_code, 6))
+    );
+
+    // 4. Batch insert auth entries
+    if (newEmps.length > 0) {
+      const authStatements = newEmps.map((emp, i) => ({
+        sql: 'INSERT INTO employee_auth (emp_code, password_hash, is_first_login) VALUES (?, ?, 1)',
+        args: [emp.emp_code, hashes[i]]
+      }));
+      await db.batch(authStatements, 'write');
     }
+
+    return res.json({ success: true, inserted: newEmps.length, skipped: existingSet.size, total: EMPLOYEES.length });
+  } catch(e) {
+    return res.status(500).json({ error: e.message, stack: e.stack });
   }
-  return res.json({ success: true, inserted, skipped, errors, total: EMPLOYEES.length, firstError });
 };
