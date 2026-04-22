@@ -385,11 +385,22 @@ window.addEventListener('DOMContentLoaded', async () => {
         await initApp();
         return;
       }
+      localStorage.removeItem('mb_token');
     } catch {}
-    localStorage.removeItem('mb_token');
   }
   show('loginSection');
 });
+
+function driveImgUrl(u) {
+  if (!u) return '';
+  const m = u.match(/[?&]id=([^&]+)/);
+  return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w600' : u;
+}
+function driveAudioUrl(u) {
+  if (!u) return '';
+  const m = u.match(/[?&]id=([^&]+)/);
+  return m ? '/api/file?id=' + m[1] : u;
+}
 
 // ─── VIEW HELPERS ─────────────────────────────────────
 function show(id) {
@@ -842,8 +853,8 @@ function buildEntryCard(entry) {
     </div>
     <div class="entry-body">
       ${reqSummary ? `<div class="req-summary">${reqSummary}</div>` : ''}
-      ${entry.audioUrl ? `<div style="margin-top:8px"><audio controls src="${esc(entry.audioUrl)}" style="width:100%;height:36px"></audio></div>` : ''}
-      ${entry.photoUrls && entry.photoUrls.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${entry.photoUrls.map(u=>`<img src="${esc(u)}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd">`).join('')}</div>` : ''}
+      ${entry.audioUrl ? `<div style="margin-top:8px"><audio controls src="${esc(driveAudioUrl(entry.audioUrl))}" style="width:100%;height:36px"></audio></div>` : ''}
+      ${entry.photoUrls && entry.photoUrls.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${entry.photoUrls.map(u=>`<img src="${esc(driveImgUrl(u))}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd">`).join('')}</div>` : ''}
       <div class="status-actions">
         <button class="btn btn-sm ${entry.fulfillmentStatus==='Fulfilled'?'btn-gray':'btn-primary'}" onclick="updateStatus('${esc(entry.id)}','Fulfilled')">&#x2714; Fulfilled</button>
         <button class="btn btn-sm ${entry.fulfillmentStatus==='Not_Fulfilled'?'btn-gray':'btn-danger'}" onclick="updateStatus('${esc(entry.id)}','Not_Fulfilled')">&#x2718; Not Fulfilled</button>
