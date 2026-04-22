@@ -19,7 +19,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 /* ── SECTIONS ── */
 .page{width:100%;max-width:600px;padding:0 0 80px;flex:1}
 /* ── LOGIN ── */
-#loginSection{width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center}
+#loginSection{width:100%;max-width:600px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
 .login-hero{width:100%;background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;padding:40px 20px 30px;text-align:center}
 .login-hero .logo{font-size:52px;margin-bottom:8px}
 .login-hero h1{font-size:22px;font-weight:700}
@@ -394,8 +394,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // ─── VIEW HELPERS ─────────────────────────────────────
 function show(id) {
-  ['loginSection','forgotSection','appSection'].forEach(s => document.getElementById(s).classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+  ['loginSection','forgotSection','appSection'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
+  });
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove('hidden'); el.style.display = ''; }
+  window.scrollTo(0, 0);
 }
 function showLogin() { show('loginSection'); }
 function showForgot() { show('forgotSection'); showForgotStep(1); }
@@ -518,6 +523,7 @@ async function doLogin() {
     currentUser = r.employee;
     if (remember) localStorage.setItem('mb_token', authToken);
     else localStorage.removeItem('mb_token');
+    document.getElementById('loginSection').classList.add('hidden');
     await initApp();
   } catch(e) {
     showToast('Network error. Please try again.', 'error');
