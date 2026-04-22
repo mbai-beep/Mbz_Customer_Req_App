@@ -52,6 +52,7 @@ async function ensureTable() {
   // Safe migration: add password expiry + history columns to employee_auth
   try { await d.execute('ALTER TABLE employee_auth ADD COLUMN password_changed_at TEXT'); } catch(e) {}
   try { await d.execute("ALTER TABLE employee_auth ADD COLUMN password_history TEXT DEFAULT '[]'"); } catch(e) {}
+  try { await d.execute('ALTER TABLE employee_auth ADD COLUMN tc_accepted INTEGER DEFAULT 0'); } catch(e) {}
 }
 
 module.exports = { getDB, ensureTable };
