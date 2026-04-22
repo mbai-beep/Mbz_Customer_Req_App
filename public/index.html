@@ -335,6 +335,24 @@ select option:disabled{color:#bbb}
   </div>
 </div>
 
+<!-- ══ EXPIRED PASSWORD MODAL ══ -->
+<div id="expiredPwdModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>&#x1F512; Password Expired</h3>
+    <p>Your password has expired (passwords must be renewed every 60 days).<br>Please set a new password to continue.</p>
+    <div class="field"><label>Current Password</label>
+      <div class="pw-wrap"><input type="password" id="epCurrent" placeholder="Enter current password"><button class="pw-toggle" onclick="togglePw('epCurrent',this)" tabindex="-1">&#128065;</button></div>
+    </div>
+    <div class="field"><label>New Password</label>
+      <div class="pw-wrap"><input type="password" id="epNew" placeholder="Min. 6 characters"><button class="pw-toggle" onclick="togglePw('epNew',this)" tabindex="-1">&#128065;</button></div>
+    </div>
+    <div class="field"><label>Confirm New Password</label>
+      <div class="pw-wrap"><input type="password" id="epConfirm" placeholder="Re-enter new password"><button class="pw-toggle" onclick="togglePw('epConfirm',this)" tabindex="-1">&#128065;</button></div>
+    </div>
+    <button class="btn btn-primary" onclick="doExpiredPasswordChange()" id="epBtn">Set New Password</button>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -547,6 +565,12 @@ async function doLogin() {
     if (!r.success) return showToast(r.error || 'Login failed', 'error');
     authToken = r.token;
     currentUser = r.employee;
+    if (r.passwordExpired) {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('expiredPwdModal').classList.remove('hidden');
+      ['epCurrent','epNew','epConfirm'].forEach(id => { document.getElementById(id).value = ''; });
+      return;
+    }
     if (remember) saveAuthToken(authToken);
     else clearAuthToken()
     document.getElementById('loginSection').classList.add('hidden');
@@ -559,6 +583,27 @@ async function doLogin() {
 }
 
 // ─── LOGOUT ───────────────────────────────────────────
+  // ─── EXPIRED PASSWORD CHANGE ───────────────────────────
+  async function doExpiredPasswordChange() {
+    const current = document.getElementById('epCurrent').value;
+    const newPwd = document.getElementById('epNew').value;
+    const confirm = document.getElementById('epConfirm').value;
+    if (!current || !newPwd || !confirm) return showToast('All fields are required', 'error');
+    if (newPwd !== confirm) return showToast('Passwords do not match', 'error');
+    if (newPwd.length < 6) return showToast('Password must be at least 6 characters', 'error');
+    setLoading('epBtn', true, 'Saving...');
+    try {
+      const r = await apiFetch('/api/auth?action=change-password', 'POST', {
+        empCode: currentUser.empCode, currentPassword: current, newPassword: newPwd
+      });
+      if (!r.success) return showToast(r.error || 'Failed to change password', 'error');
+      document.getElementById('expiredPwdModal').classList.add('hidden');
+      showToast('Password updated! Logging you in…', 'success');
+      await initApp();
+    } catch { showToast('Network error', 'error'); }
+    finally { setLoading('epBtn', false, 'Set New Password'); }
+  }
+
 function doLogout() {
   authToken = null; currentUser = null;
   clearAuthToken()
