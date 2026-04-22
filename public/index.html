@@ -674,7 +674,7 @@ async function submitRequirement() {
         const b64 = await new Promise((res, rej) => {
           const fr = new FileReader(); fr.onload = e => res(e.target.result); fr.onerror = () => rej(); fr.readAsDataURL(audioBlob);
         });
-        const ur = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ fileData: b64, fileName: 'audio_'+Date.now()+'.webm', mimeType: 'audio/webm' }) });
+        const ur = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ fileData: b64, fileName: 'audio_'+Date.now()+'.'+(audioBlob.type.includes('mp4')?'mp4':audioBlob.type.includes('ogg')?'ogg':'webm'), mimeType: audioBlob.type||'audio/webm' }) });
         const ud = await ur.json(); audioUploadUrl = ud.url || '';
       } catch {}
     }
@@ -739,10 +739,11 @@ async function startRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioChunks = []; recSeconds = 0;
-    mediaRecorder = new MediaRecorder(stream);
+    const recMime = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+    mediaRecorder = new MediaRecorder(stream, recMime ? {mimeType:recMime} : {});
     mediaRecorder.ondataavailable = e => { if (e.data.size) audioChunks.push(e.data); };
     mediaRecorder.onstop = () => {
-      audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType||'audio/webm' });
       const url = URL.createObjectURL(audioBlob);
       const player = document.getElementById('audioPlayer');
       player.src = url; player.classList.remove('hidden');
@@ -752,7 +753,7 @@ async function startRecording() {
           const b64 = await new Promise((res,rej) => {
             const fr = new FileReader(); fr.onload = e => res(e.target.result); fr.onerror = rej; fr.readAsDataURL(audioBlob);
           });
-          const r = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ fileData: b64, fileName: 'audio_'+Date.now()+'.webm', mimeType: 'audio/webm' }) });
+          const r = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ fileData: b64, fileName: 'audio_'+Date.now()+'.'+(audioBlob.type.includes('mp4')?'mp4':audioBlob.type.includes('ogg')?'ogg':'webm'), mimeType: audioBlob.type||'audio/webm' }) });
           const d = await r.json(); audioUploadUrl = d.url || '';
         } catch(e) { console.warn('Audio upload failed', e); }
       })();
