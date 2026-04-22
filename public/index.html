@@ -372,10 +372,26 @@ let photoUrls = [];
 let fpResetToken = '';
 let fpEmpCodeVal = '';
 
-// ─── INIT ─────────────────────────────────────────────
+// ─── AUTH STORAGE HELPERS (localStorage + cookie fallback for iOS) ───
+  function saveAuthToken(tk) {
+    try { localStorage.setItem('mb_token', tk); } catch(e) {}
+    const d = new Date(Date.now() + 30*24*60*60*1000);
+    document.cookie = 'mb_tok=' + encodeURIComponent(tk) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+  function getAuthToken() {
+    try { const v = localStorage.getItem('mb_token'); if (v) return v; } catch(e) {}
+    const m = document.cookie.match(/(?:^|;\s*)mb_tok=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  function clearAuthToken() {
+    try { localStorage.removeItem('mb_token'); } catch(e) {}
+    document.cookie = 'mb_tok=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+  }
+
+  // ─── INIT ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   buildChecklist();
-  const saved = localStorage.getItem('mb_token');
+  const saved = getAuthToken();
   if (saved) {
     authToken = saved;
     try {
@@ -385,7 +401,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         await initApp();
         return;
       }
-      localStorage.removeItem('mb_token');
+      clearAuthToken();
     } catch {}
   }
   show('loginSection');
@@ -531,8 +547,8 @@ async function doLogin() {
     if (!r.success) return showToast(r.error || 'Login failed', 'error');
     authToken = r.token;
     currentUser = r.employee;
-    if (remember) localStorage.setItem('mb_token', authToken);
-    else localStorage.removeItem('mb_token');
+    if (remember) saveAuthToken(authToken);
+    else clearAuthToken()
     document.getElementById('loginSection').classList.add('hidden');
     await initApp();
   } catch(e) {
@@ -545,7 +561,7 @@ async function doLogin() {
 // ─── LOGOUT ───────────────────────────────────────────
 function doLogout() {
   authToken = null; currentUser = null;
-  localStorage.removeItem('mb_token');
+  clearAuthToken()
   showLogin();
   showToast('Logged out successfully');
 }
