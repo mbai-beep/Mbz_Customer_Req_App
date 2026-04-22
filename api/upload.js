@@ -61,7 +61,9 @@ module.exports = async function handler(req, res) {
       supportsAllDrives: true,
     });
 
-    const url = `https://drive.google.com/uc?id=${fileId}&export=view`;
+    const url = (mimeType && mimeType.startsWith('image/'))
+    ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
+    : `/api/file?id=${fileId}`;
     return res.status(200).json({ url, fileId });
 
   } catch (err) {
