@@ -85,6 +85,7 @@ module.exports = async (req, res) => {
       success: true,
       token,
       passwordExpired: !!passwordExpired,
+      tcAccepted: Number(auth.tc_accepted || 0) === 1,
       employee: {
         empCode: emp.emp_code,
         empName: emp.emp_name,
@@ -155,6 +156,14 @@ module.exports = async (req, res) => {
       sql: 'UPDATE employee_auth SET password_hash = ?, is_first_login = 0, password_changed_at = ?, password_history = ? WHERE emp_code = ?',
       args: [hash, now, newHistory, parseInt(empCode)]
     });
+    return res.json({ success: true });
+  }
+
+  // ── POST /api/auth?action=accept-tc ─────────────────────
+  if (action === 'accept-tc' && req.method === 'POST') {
+    const { empCode } = req.body || {};
+    if (!empCode) return res.json({ success: false, error: 'empCode required' });
+    await db.execute({ sql: 'UPDATE employee_auth SET tc_accepted = 1 WHERE emp_code = ?', args: [parseInt(empCode)] });
     return res.json({ success: true });
   }
 
