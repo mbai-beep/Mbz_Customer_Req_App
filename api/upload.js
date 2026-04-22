@@ -61,9 +61,11 @@ module.exports = async function handler(req, res) {
       supportsAllDrives: true,
     });
 
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
     const url = (mimeType && mimeType.startsWith('image/'))
     ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
-    : `/api/file?id=${fileId}`;
+    : `${proto}://${host}/api/file?id=${fileId}`;
     return res.status(200).json({ url, fileId });
 
   } catch (err) {
