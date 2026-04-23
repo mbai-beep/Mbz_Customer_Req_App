@@ -351,7 +351,7 @@ select option:disabled{color:#bbb}
 </div>
 </div>
 
-!-- ══════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      CHANGE PASSWORD MODAL (first login)
 ══════════════════════════════════════════════════════ -->
 <div id="changePwdModal" class="modal-overlay hidden">
@@ -758,7 +758,7 @@ async function submitAddEmployee() {
     hideAddEmpForm();
   } catch(e) { showToast('Network error', 'error'); }
   finally { setLoading('addEmpSubmitBtn', false, 'Add Employee'); }
-}}
+}
 
 async function doExpiredPasswordChange() {
     const current = document.getElementById('epCurrent').value;
