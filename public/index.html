@@ -695,33 +695,38 @@ async function loadAdminEmployees() {
 function renderAdminEmployees(emps) {
   const list = document.getElementById('adminEmpList');
   if (!emps || !emps.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#888">No employees found</div>'; return; }
-  const total = emps.length, active = emps.filter(e => e.store_status === 'Active').length;
-  list.innerHTML = '<div style="font-size:0.8rem;color:#666;margin-bottom:10px">' + total + ' employees &bull; ' + active + ' active, ' + (total-active) + ' inactive</div>' +
-    emps.map(e => {
-      const isActive = e.store_status === 'Active';
-      const name = (e.emp_name || '').replace(/'/g, '&#39;');
-      return '<div style="background:#fff;border-radius:8px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
-          '<div>' +
-            '<div style="font-weight:600;font-size:0.95rem">' + e.emp_name + ' <span style="color:#999;font-size:0.8rem">#' + e.emp_code + '</span></div>' +
-            '<div style="font-size:0.8rem;color:#666">' + (e.emp_designation || '') + (e.store_name ? ' &bull; ' + e.store_name : '') + '</div>' +
-            (e.emp_mobile ? '<div style="font-size:0.75rem;color:#999">&#x1F4F1; ' + e.emp_mobile + '</div>' : '') +
-          '</div>' +
-          '<span style="padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;background:' + (isActive ? '#e8f5e9' : '#ffebee') + ';color:' + (isActive ? '#2e7d32' : '#c62828') + '">' + e.store_status + '</span>' +
-        '</div>' +
-        '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">' +
-          '<button class="btn btn-secondary btn-sm" onclick="adminResetPwd(' + e.emp_code + ', '' + name + '')">&#x1F511; Reset Password</button>' +
-          '<button class="btn btn-sm" onclick="adminToggleStatus(' + e.emp_code + ', '' + e.store_status + '')" style="background:' + (isActive ? '#fff3e0' : '#e8f5e9') + ';color:' + (isActive ? '#e65100' : '#2e7d32') + ';border:1px solid ' + (isActive ? '#ffcc80' : '#a5d6a7') + '">' + (isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate') + '</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+  const total = emps.length, active = emps.filter(function(e){ return e.store_status === 'Active'; }).length;
+  let html = '<div style="font-size:0.8rem;color:#666;margin-bottom:10px">' + total + ' employees &bull; ' + active + ' active, ' + (total - active) + ' inactive</div>';
+  emps.forEach(function(e) {
+    const isActive = e.store_status === 'Active';
+    const statusBg = isActive ? '#e8f5e9' : '#ffebee';
+    const statusColor = isActive ? '#2e7d32' : '#c62828';
+    const btnBg = isActive ? '#fff3e0' : '#e8f5e9';
+    const btnColor = isActive ? '#e65100' : '#2e7d32';
+    const btnBorder = isActive ? '#ffcc80' : '#a5d6a7';
+    const btnLabel = isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate';
+    const safeName = (e.emp_name || '').replace(/"/g, '&quot;');
+    html += '<div style="background:#fff;border-radius:8px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.08)">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+    html += '<div>';
+    html += '<div style="font-weight:600;font-size:0.95rem">' + e.emp_name + ' <span style="color:#999;font-size:0.8rem">#' + e.emp_code + '</span></div>';
+    html += '<div style="font-size:0.8rem;color:#666">' + (e.emp_designation || '') + (e.store_name ? ' &bull; ' + e.store_name : '') + '</div>';
+    if (e.emp_mobile) html += '<div style="font-size:0.75rem;color:#999">&#x1F4F1; ' + e.emp_mobile + '</div>';
+    html += '</div>';
+    html += '<span style="padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;background:' + statusBg + ';color:' + statusColor + '">' + e.store_status + '</span>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
+    html += '<button class="btn btn-secondary btn-sm" data-code="' + e.emp_code + '" data-name="' + safeName + '" onclick="adminResetPwd(this.dataset.code, this.dataset.name)">&#x1F511; Reset Password</button>';
+    html += '<button class="btn btn-sm" data-code="' + e.emp_code + '" data-status="' + e.store_status + '" onclick="adminToggleStatus(this.dataset.code, this.dataset.status)" style="background:' + btnBg + ';color:' + btnColor + ';border:1px solid ' + btnBorder + '">' + btnLabel + '</button>';
+    html += '</div></div>';
+  });
+  list.innerHTML = html;
 }
 
 async function adminToggleStatus(empCode, currentStatus) {
   const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-  if (!confirm('Are you sure you want to ' + (newStatus === 'Inactive' ? 'DEACTIVATE' : 'ACTIVATE') + ' this employee?
-
-' + (newStatus === 'Inactive' ? 'They will not be able to log in.' : 'They will regain access to the app.'))) return;
+  const msg = newStatus === 'Inactive' ? 'DEACTIVATE this employee? They will lose app access immediately.' : 'ACTIVATE this employee? They will regain app access.';
+  if (!confirm('Are you sure you want to ' + msg)) return;
   try {
     const r = await apiFetch('/api/admin?action=toggle-status', 'POST', { empCode, status: newStatus });
     if (!r.success) return showToast(r.error || 'Failed', 'error');
@@ -731,10 +736,7 @@ async function adminToggleStatus(empCode, currentStatus) {
 }
 
 async function adminResetPwd(empCode, empName) {
-  const newPwd = prompt('Set new temporary password for ' + empName + ':
-(min 6 characters)
-
-Employee will be prompted to change it on next login.');
+  const newPwd = prompt('Set new temporary password for ' + empName + ' (min 6 chars). Employee will be asked to change it on next login:');
   if (newPwd === null) return;
   if (!newPwd || newPwd.length < 6) return showToast('Password must be at least 6 characters', 'error');
   try {
