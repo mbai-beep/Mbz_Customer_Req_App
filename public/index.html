@@ -127,9 +127,6 @@ select option:disabled{color:#bbb}
 </head>
 <body>
 
-<!-- ═════════════════════════════════════════════════════
-     LOGIN SECTION
-══════════════════════════════════════════════════════ -->
 <div id="loginSection">
   <div class="mb-logo-banner">
     <img src="https://mbz.in/cdn/shop/files/logo-500-black_copy.png?v=1725614377&width=300"
@@ -167,9 +164,6 @@ select option:disabled{color:#bbb}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     FORGOT PASSWORD SECTION
-══════════════════════════════════════════════════════ -->
 <div id="forgotSection" class="hidden page" style="padding:0">
   <div class="app-header">
     <div>
@@ -222,9 +216,6 @@ select option:disabled{color:#bbb}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     MAIN APP SECTION
-══════════════════════════════════════════════════════ -->
 <div id="appSection" class="hidden" style="width:100%;max-width:600px;display:flex;flex-direction:column;min-height:100vh">
   <div class="app-header">
     <div>
@@ -380,7 +371,6 @@ select option:disabled{color:#bbb}
   </div>
 </div>
 
-<!-- ══ EXPIRED PASSWORD MODAL ══ -->
 <div id="expiredPwdModal" class="modal-overlay hidden">
   <div class="modal">
     <h3>&#x1F512; Password Expired</h3>
@@ -416,9 +406,6 @@ select option:disabled{color:#bbb}
 <!-- Toast -->
 <div id="toast"></div>
 
-<!-- ══════════════════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════════════════ -->
 <script>
 // ─── CONSTANTS ───────────────────────────────────────
 const REQUIREMENTS = [
@@ -684,7 +671,8 @@ function doDeclineTC() {
   showToast('You must accept the Terms & Conditions to use this app.', 'error');
 
 
-// ─── ADMIN PANEL ─────────────────────────────────────────────────────────────
+
+}// ─── ADMIN PANEL ─────────────────────────────────────────────────────────────
 async function searchEmployee() {
   const code = document.getElementById('searchEmpCode').value.trim();
   if (!code) return showToast('Please enter an Employee ID', 'error');
