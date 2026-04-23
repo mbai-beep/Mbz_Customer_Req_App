@@ -132,7 +132,11 @@ select option:disabled{color:#bbb}
 ══════════════════════════════════════════════════════ -->
 <div id="loginSection">
   <div class="mb-logo-banner">
-    <div class="mb-logo-text">Meena Bazaar</div>
+    <img src="https://s3-figma-hubfile-images-production.figma.com/hub/file/carousel/img/b3cfc20d920c12db4a5c92fa94768e15ecef9039"
+        class="mb-logo-img" alt="Meena Bazaar"
+        onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block'">
+    <div id="logoFallback" class="mb-logo-text" style="display:none">Meena Bazaar</div>
+  </div>
   </div>
   <div class="login-hero">
     <div class="logo">&#x1F6CD;</div>
@@ -516,6 +520,7 @@ function showView(v) {
   if (v === 'myReqs') loadMyReqs();
   document.getElementById('adminView').classList.toggle('hidden', v !== 'admin');
   document.getElementById('tabAdmin').classList.toggle('active', v === 'admin');
+  if (v === 'admin') loadAdminEmployees();
 }
 
 // ─── APP INIT ─────────────────────────────────────────
@@ -527,6 +532,7 @@ async function initApp() {
   if (currentUser.role === 'admin') {
     document.getElementById('tabAdmin').classList.remove('hidden');
     showView('admin');
+    loadAdminEmployees();
   }
 
   await loadStores();
@@ -1205,6 +1211,7 @@ body { background: #EAE7DB !important; }
 .page-tabs .tab-btn.active { border-bottom-color: #CCD96F !important; color: #333333 !important; }
 .login-card { border-top: 3px solid #b8c55a !important; }
       .mb-logo-banner { background: #EAE7DB; padding: 22px 20px 14px; text-align: center; }
+.mb-logo-img { height: 90px; width: auto; max-width: 100%; display: block; margin: 0 auto; }
 .mb-logo-text { font-family: 'Sacramento', cursive; font-size: 54px; color: #2c2c2c; line-height: 1.2; }
      </style>
 </body>
