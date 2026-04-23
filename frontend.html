@@ -342,6 +342,10 @@ input[type="file"] { display: none; }
         <label>Store name *</label>
         <input type="text" id="custStore" placeholder="Store or branch name">
       </div>
+    <div class="form-group">
+      <label class="form-label">Store Code</label>
+      <input type="text" id="custStoreCode" placeholder="Store code (optional)" class="form-control">
+    </div>
     </div>
     <div class="form-section">
       <div class="form-section-title">Requirement details</div>
@@ -468,7 +472,8 @@ let isRecording = false;
 let mediaRecorder = null;
 let audioChunks = [];
 let audioBlob = null;
-let audioUrl = null;
+let photoUploadUrls = []; let audioUploadUrl = '';
+    let audioUrl = null;
 let recInterval = null;
 let recSeconds = 0;
 
@@ -689,17 +694,33 @@ function resetForm() {
   if(currentUser?.store) document.getElementById('custStore').value=currentUser.store;
 }
 
-function handlePhotos(input) {
-  Array.from(input.files).forEach(file => {
+function handlePhotos(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  files.forEach(file => {
     photos.push(file);
-    const r=new FileReader();
-    r.onload=e=>{
-      photoDataUrls.push(e.target.result);
-      addPhotoThumb(e.target.result);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      photoDataUrls.push(base64);
+      addPhotoThumb(base64, photos.length - 1);
+      try {
+        const ext = (file.name.split('.').pop() || 'jpg');
+        const fname = 'photo_' + Date.now() + '_' + Math.random().toString(36).slice(2) + '.' + ext;
+        const resp = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({fileData: base64, fileName: fname, mimeType: file.type || 'image/jpeg'})
+        });
+        const data = await resp.json();
+        photoUploadUrls.push(data.url || '');
+      } catch(err) {
+        console.warn('Drive photo upload failed:', err);
+        photoUploadUrls.push('');
+      }
     };
-    r.readAsDataURL(file);
+    reader.readAsDataURL(file);
   });
-  input.value='';
 }
 
 function addPhotoThumb(src) {
@@ -718,13 +739,25 @@ async function toggleVoice() {
     mediaRecorder=new MediaRecorder(stream);
     audioChunks=[];
     mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
-    mediaRecorder.onstop=()=>{
+    mediaRecorder.onstop=async ()=>{
+
       audioBlob=new Blob(audioChunks,{type:'audio/webm'});
       audioUrl=URL.createObjectURL(audioBlob);
       document.getElementById('playBtn').style.display='';
       document.getElementById('voiceBtn').classList.remove('recording');
       document.getElementById('voiceBtn').classList.add('has-data');
       document.getElementById('voiceBtnLabel').textContent='Recorded ✓';
+      try {
+        const _ar = new FileReader();
+        _ar.onload = async (ev) => {
+          const _b64 = ev.target.result;
+          const _fn = 'audio_' + Date.now() + '.webm';
+          const _r = await fetch('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fileData:_b64,fileName:_fn,mimeType:'audio/webm'})});
+          const _d = await _r.json();
+          audioUploadUrl = _d.url || '';
+        };
+        _ar.readAsDataURL(audioBlob);
+      } catch(_e) { console.warn('Drive audio upload failed:',_e); audioUploadUrl=''; }
     };
     mediaRecorder.start();
     isRecording=true; recSeconds=0;
@@ -766,6 +799,8 @@ async function submitForm() {
     customerName: name,
     mobileNumber: mobile,
     storeName: store,
+    storeCode: document.getElementById('custStoreCode') ? document.getElementById('custStoreCode').value.trim() : '',
+    requirement: desc,
     description: desc,
     employee: currentUser?.name || 'Unknown',
     employeeId: currentUser?.id || '',
@@ -774,11 +809,31 @@ async function submitForm() {
     hasVoice: !!audioBlob,
     voiceDuration: audioBlob ? recSeconds + 's' : '',
     photoCount: photos.length,
+    photoUrls: photoUploadUrls,
+    audioUrl: audioUploadUrl,
     synced: false,
   };
 
   entries.push(entry);
   saveEntries();
+
+  // Sync to backend DB and Google Sheets
+  (async () => {
+    try {
+      await fetch('/api/entries', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(entry)
+      });
+    } catch(e) { console.warn('DB sync failed:', e); }
+    try {
+      await fetch('/api/sheets', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({entry})
+      });
+    } catch(e) { console.warn('Sheets sync failed:', e); }
+  })();
 
   // Sync to Google Sheets
   if (SCRIPT_URL) {
@@ -920,24 +975,33 @@ function viewMgrEntry(id) {
 }
 
 function exportCSV() {
-  const headers=['ID','Customer Name','Mobile','Store','Description','Employee','Employee ID','Date','Status','Voice Note','Voice Duration','Photo Count','Synced'];
+  const headers=['ID','Date','Customer Name','Mobile','Store Name','Store Code','Description','Employee','Employee ID','Status','Voice Note','Voice Duration','Photo Count','Photo URLs','Audio URL','Synced'];
   const rows=entries.map(e=>[
-    e.id, `"${(e.customerName||'').replace(/"/g,'""')}"`, e.mobileNumber,
-    `"${(e.storeName||'').replace(/"/g,'""')}"`,
-    `"${(e.description||'').replace(/"/g,'""')}"`,
-    e.employee, e.employeeId||'',
+    e.id,
     formatFull(new Date(e.createdAt)),
-    e.status||'new', e.hasVoice?'Yes':'No',
-    e.voiceDuration||'', e.photoCount||0,
+    '"'+((e.customerName||'').replace(/"/g,'""'))+'"',
+    e.mobileNumber,
+    '"'+((e.storeName||'').replace(/"/g,'""'))+'"',
+    '"'+((e.storeCode||'').replace(/"/g,'""'))+'"',
+    '"'+((e.description||'').replace(/"/g,'""'))+'"',
+    '"'+((e.employee||'').replace(/"/g,'""'))+'"',
+    e.employeeId||'',
+    e.status||'new',
+    e.hasVoice?'Yes':'No',
+    e.voiceDuration||'',
+    e.photoCount||0,
+    '"'+((Array.isArray(e.photoUrls)?e.photoUrls.join('; '):(e.photoUrls||'')).replace(/"/g,'""'))+'"',
+    '"'+((e.audioUrl||'').replace(/"/g,'""'))+'"',
     e.synced?'Yes':'No'
   ]);
   const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='MB_Customer_Requirements.csv';
+  a.href=url;
+  a.download='customer_requirements.csv';
   a.click();
-  showToast('Exported: MB_Customer_Requirements.csv','success');
+  URL.revokeObjectURL(url);
 }
 
 // ════════════════════════════════════════
