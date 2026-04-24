@@ -31,6 +31,23 @@ module.exports = async (req, res) => {
   const db = getDB();
   const { action } = req.query;
 
+  // ── GET single employee by ID ───────────────────────
+  if (action === 'get-employee') {
+    const { empCode } = req.query;
+    if (!empCode) return res.json({ success: false, error: 'empCode required' });
+    const result = await db.execute({
+      sql: `SELECT e.emp_code, e.emp_name, e.emp_designation, e.emp_mobile,
+             e.store_name, e.store_code, e.store_status, e.role,
+             COALESCE(a.tc_accepted, 0) AS tc_accepted
+      FROM employees e
+      LEFT JOIN employee_auth a ON e.emp_code = a.emp_code
+      WHERE e.emp_code = ?`,
+      args: [parseInt(empCode)]
+    });
+    if (!result.rows.length) return res.json({ success: false, error: 'Employee ID not found' });
+    return res.json({ success: true, employee: result.rows[0] });
+  }
+
   // ── GET list of all employees ─────────────────────────────
   if (action === 'list-employees') {
     const result = await db.execute(`
