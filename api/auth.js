@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  await ensureTable();
+  try { await ensureTable(); } catch(e) { console.error("DB init error:", e.message); }
   const db = getDB();
   const { action } = req.query;
 
