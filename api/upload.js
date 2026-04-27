@@ -17,15 +17,15 @@ module.exports = async function handler(req, res) {
     const buffer = Buffer.from(base64Data, 'base64');
 
     // Parse service account - handle literal newlines in Vercel env vars
-    let serviceAccount;
+    let let serviceAccount;
+    const saEnv = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
+    if (!saEnv) throw new Error('Missing GOOGLE_SERVICE_ACCOUNT env var');
     try {
-      serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-    } catch (e) {
-      serviceAccount = JSON.parse(
-        process.env.GOOGLE_SERVICE_ACCOUNT.replace(/\n/g, '\\n').replace(/\r/g, '')
-      );
+      serviceAccount = JSON.parse(Buffer.from(saEnv, 'base64').toString('utf8'));
+    } catch(e1) {
+      try { serviceAccount = JSON.parse(saEnv); }
+      catch(e2) { serviceAccount = JSON.parse(saEnv.replace(/\\n/g, '\n')); }
     }
-
     const auth = new google.auth.GoogleAuth({
       credentials: serviceAccount,
       scopes: ['https://www.googleapis.com/auth/drive'],
