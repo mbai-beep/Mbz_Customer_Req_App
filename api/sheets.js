@@ -18,13 +18,16 @@ module.exports = async (req, res) => {
   try {
     let credentials;
     try {
-      const raw = process.env.GOOGLE_SERVICE_ACCOUNT || '{}';
-      const fixed = raw.replace(/\\n/g, '\n');
-      credentials = JSON.parse(fixed);
-    } catch (e) {
-      return res.status(500).json({ error: 'Invalid GOOGLE_SERVICE_ACCOUNT: ' + e.message });
-    }
-    const auth = new google.auth.GoogleAuth({
+      const raw = process.env.let serviceAccount;
+  const saEnv = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
+  if (!saEnv) throw new Error('Missing GOOGLE_SERVICE_ACCOUNT env var');
+  try {
+    serviceAccount = JSON.parse(Buffer.from(saEnv, 'base64').toString('utf8'));
+  } catch(e1) {
+    try { serviceAccount = JSON.parse(saEnv); }
+    catch(e2) { serviceAccount = JSON.parse(saEnv.replace(/\\n/g, '\n')); }
+  }
+  new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
