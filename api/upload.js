@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
     const buffer = Buffer.from(base64Data, 'base64');
 
     // Parse service account - handle literal newlines in Vercel env vars
-    let let serviceAccount;
+    let serviceAccount;
     const saEnv = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
     if (!saEnv) throw new Error('Missing GOOGLE_SERVICE_ACCOUNT env var');
     try {
