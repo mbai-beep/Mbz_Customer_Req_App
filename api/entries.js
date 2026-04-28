@@ -27,7 +27,8 @@ function mapRow(r) {
     audioUrl: r.audio_url || '',
     syncedAt: r.synced_at,
     fulfillmentStatus: r.fulfillment_status || 'Pending',
-    submittedBy: r.submitted_by || 0
+    submittedBy: r.submitted_by || 0,
+    requirementType: r.requirement_type || 'New'
   };
 }
 
@@ -86,7 +87,7 @@ async function appendToSheet(entry) {
       req, entry.description, entry.employee, entry.employeeId, toIST(entry.createdAt),
       'Pending', entry.hasVoice ? 'Yes' : 'No', entry.voiceDuration,
       entry.photoCount, (entry.photoUrls||[]).join(', '), entry.audioUrl,
-      new Date().toISOString(), entry.submittedBy || ''
+      new Date().toISOString(), entry.submittedBy || '', entry.requirementType || 'New'
     ];
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
@@ -124,8 +125,8 @@ module.exports = async function handler(req, res) {
       sql: `INSERT OR REPLACE INTO entries
         (id, customer_name, mobile_number, store_name, store_code, requirement, description,
          employee, employee_id, created_at, status, has_voice, voice_duration,
-         photo_count, photo_urls, audio_url, synced_at, fulfillment_status, submitted_by)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+         photo_count, photo_urls, audio_url, synced_at, fulfillment_status, submitted_by, requirement_type)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       args: [
         b.id, b.customerName, b.mobileNumber, b.storeName,
         b.storeCode || '', b.requirement || '', b.description || '',
@@ -133,7 +134,8 @@ module.exports = async function handler(req, res) {
         b.status || 'new', b.hasVoice ? 1 : 0,
         b.voiceDuration || '', b.photoCount || 0,
         photoUrlsJson, b.audioUrl || '', new Date().toISOString(),
-        b.fulfillmentStatus || 'Pending', b.submittedBy || 0
+        b.fulfillmentStatus || 'Pending', b.submittedBy || 0,
+        b.requirementType || 'New'
       ]
     });
     // Async sheet append (don't block response)

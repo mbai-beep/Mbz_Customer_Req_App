@@ -53,6 +53,8 @@ async function ensureTable() {
   try { await d.execute('ALTER TABLE employee_auth ADD COLUMN password_changed_at TEXT'); } catch(e) {}
   try { await d.execute("ALTER TABLE employee_auth ADD COLUMN password_history TEXT DEFAULT '[]'"); } catch(e) {}
   try { await d.execute('ALTER TABLE employee_auth ADD COLUMN tc_accepted INTEGER DEFAULT 0'); } catch(e) {}
+  // Safe migration: add requirement_type column
+  try { await d.execute("ALTER TABLE entries ADD COLUMN requirement_type TEXT DEFAULT 'New'"); } catch(e) {}
   // Ensure primary admin role
   try { await d.execute({ sql: "UPDATE employees SET role=? WHERE emp_code=?", args: ['admin', 2266] }); } catch(e) {}
 }

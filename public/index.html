@@ -116,6 +116,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 .spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{text-align:center;padding:32px;color:#999;font-size:14px}
+/* ── REQUIREMENT TYPE TOGGLE ── */
+.req-type-row{display:flex;gap:12px;margin-top:6px}
+.req-type-btn{flex:1;border:2px solid #ddd;border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;background:#fafafa;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;-webkit-user-select:none}
+.req-type-btn .rt-icon{font-size:22px}
+.req-type-btn .rt-label{font-size:14px;font-weight:700;color:#333}
+.req-type-btn .rt-sub{font-size:11px;color:#888;margin-top:1px}
+.req-type-btn.selected{border-color:#FDD32C;background:#fffbe6;box-shadow:0 0 0 2px #FDD32C}
+.req-type-btn.selected .rt-label{color:#1b5e20}
 /* ── MISC ── */
 .divider{height:1px;background:#f0f0f0;margin:10px 0}
 .section-gap{height:10px}
@@ -250,6 +258,23 @@ select option:disabled{color:#bbb}
         </div>
         <div class="field"><label>Store Code <span style="color:#c62828">*</span></label>
           <select id="custStoreCode" onchange="storeCodeChange()"><option value="">Select code...</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Requirement Type -->
+    <div class="card">
+      <div class="card-title">&#x1F4CC; Requirement Type <span style="color:#c62828;font-size:12px;font-weight:400;margin-left:4px">* Required</span></div>
+      <div class="req-type-row">
+        <div class="req-type-btn" id="rtExisting" onclick="setReqType('Existing')">
+          <span class="rt-icon">&#x1F504;</span>
+          <span class="rt-label">Existing</span>
+          <span class="rt-sub">Customer has shopped before</span>
+        </div>
+        <div class="req-type-btn" id="rtNew" onclick="setReqType('New')">
+          <span class="rt-icon">&#x2728;</span>
+          <span class="rt-label">New</span>
+          <span class="rt-sub">First-time customer</span>
         </div>
       </div>
     </div>
@@ -435,6 +460,7 @@ let audioChunks = [];
 let recInterval = null;
 let recSeconds = 0;
 let photoUrls = [];
+let requirementType = '';
 let fpResetToken = '';
 let fpEmpCodeVal = '';
 
@@ -603,6 +629,12 @@ function resetChecklist() {
     document.querySelectorAll(`#chips_${cat.id} .chip`).forEach(c => c.classList.remove('selected'));
   });
   document.getElementById('otherReqText').value = '';
+}
+
+function setReqType(type) {
+  requirementType = type;
+  document.getElementById('rtExisting').classList.toggle('selected', type === 'Existing');
+  document.getElementById('rtNew').classList.toggle('selected', type === 'New');
 }
 
 // ─── LOGIN ────────────────────────────────────────────
@@ -899,6 +931,7 @@ async function submitRequirement() {
   if (!/^\d{10}$/.test(mobile)) return showToast('Enter a valid 10-digit mobile number', 'error');
   if (!storeName) return showToast('Select store name', 'error');
   if (!storeCode) return showToast('Select store code', 'error');
+  if (!requirementType) return showToast('Please select Requirement Type (Existing or New)', 'error');
   if (!hasChecklist && !otherText) return showToast('Please select at least one requirement or fill Other Requirements', 'error');
 
   setLoading('submitBtn', true, 'Submitting...');
@@ -937,7 +970,8 @@ async function submitRequirement() {
       photoUrls,
       audioUrl: audioUploadUrl,
       fulfillmentStatus: 'Pending',
-      submittedBy: currentUser.empCode
+      submittedBy: currentUser.empCode,
+      requirementType
     };
 
     const r = await apiFetch('/api/entries', 'POST', body);
@@ -956,6 +990,9 @@ function resetForm() {
   document.getElementById('custName').value = '';
   document.getElementById('custMobile').value = '';
   resetChecklist();
+  requirementType = '';
+  document.getElementById('rtExisting').classList.remove('selected');
+  document.getElementById('rtNew').classList.remove('selected');
   audioBlob = null; audioUploadUrl = ''; audioUploadPromise = Promise.resolve();
   document.getElementById('audioPlayer').classList.add('hidden');
   document.getElementById('audioPlayer').src = '';
@@ -1086,6 +1123,7 @@ function buildEntryCard(entry) {
         <div class="entry-name">${esc(entry.customerName)}</div>
         <div class="entry-meta">&#x1F4DE; ${esc(entry.mobileNumber)} &nbsp;&bull;&nbsp; &#x1F3EA; ${esc(entry.storeName)} (${esc(entry.storeCode)})</div>
         <div class="entry-meta">&#x1F464; ${esc(entry.employee)} &nbsp;&bull;&nbsp; &#x1F4C5; ${date}</div>
+        ${entry.requirementType ? `<div class="entry-meta" style="margin-top:3px"><span style="background:${entry.requirementType==='New'?'#e3f2fd':'#fff8e1'};color:${entry.requirementType==='New'?'#1565c0':'#e65100'};border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">${entry.requirementType==='New'?'✨ New Customer':'🔄 Existing Customer'}</span></div>` : ''}
       </div>
       <span class="status-badge ${statusClass}">${statusLabel}</span>
     </div>

@@ -17,13 +17,11 @@ module.exports = async function handler(req, res) {
 
   try {
     let serviceAccount;
-    try {
-      serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT);
-    } catch (e) {
-      serviceAccount = JSON.parse(
-        process.env.GOOGLE_SERVICE_ACCOUNT.replace(/\n/g, '\\n').replace(/\r/g, '')
-      );
-    }
+    const saRaw = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
+    if (!saRaw) throw new Error('Missing GOOGLE_SERVICE_ACCOUNT env var');
+    try { serviceAccount = JSON.parse(Buffer.from(saRaw, 'base64').toString('utf8')); } catch(e) {}
+    if (!serviceAccount) try { serviceAccount = JSON.parse(saRaw); } catch(e) {}
+    if (!serviceAccount) serviceAccount = JSON.parse(saRaw.replace(/\n/g, '\\n').replace(/\r/g, ''));
 
     const auth = new google.auth.GoogleAuth({
       credentials: serviceAccount,

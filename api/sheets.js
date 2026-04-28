@@ -4,7 +4,7 @@ const HEADERS = [
   'id','customer_name','mobile_number','store_name','store_code',
   'requirement','employee','employee_id','created_at','status',
   'has_voice','voice_duration','photo_count','photo_urls','audio_url',
-  'fulfillment_status','submitted_by'
+  'fulfillment_status','submitted_by','requirement_type'
 ];
 
 function getServiceAccount() {
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
 
     // Ensure header row exists
     try {
-      const headerCheck = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!A1:Q1' });
+      const headerCheck = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!A1:R1' });
       const existingHeaders = headerCheck.data.values && headerCheck.data.values[0];
       if (!existingHeaders || existingHeaders.length === 0) {
         await sheets.spreadsheets.values.update({
@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: 'Sheet1!A:Q',
+      range: 'Sheet1!A:R',
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       requestBody: { values: [row] },
