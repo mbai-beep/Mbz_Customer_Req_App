@@ -32,11 +32,13 @@ function mapRow(r) {
 }
 
 async function getSheetsClient() {
-  if (!process.env.GOOGLE_SERVICE_ACCOUNT || !process.env.GOOGLE_SHEET_ID) return null;
+  const saRaw = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
+  if (!saRaw || !process.env.GOOGLE_SHEET_ID) return null;
   try {
     let sa;
-    try { sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT); }
-    catch { sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT.replace(/\n/g, '\\n').replace(/\r/g, '')); }
+    try { sa = JSON.parse(Buffer.from(saRaw, 'base64').toString('utf8')); } catch(e) {}
+    if (!sa) try { sa = JSON.parse(saRaw); } catch(e) {}
+    if (!sa) sa = JSON.parse(saRaw.replace(/\n/g, '\\n').replace(/\r/g, ''));
     const auth = new google.auth.GoogleAuth({
       credentials: sa,
       scopes: ['https://www.googleapis.com/auth/spreadsheets']
