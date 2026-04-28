@@ -50,9 +50,11 @@ module.exports = async function handler(req, res) {
     const fileId = uploadRes.data.id;
     await drive.permissions.create({ fileId, requestBody: { role: 'reader', type: 'anyone' }, supportsAllDrives: true });
 
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
     const url = (mimeType && mimeType.startsWith('image/'))
       ? 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w800'
-      : 'https://drive.google.com/file/d/' + fileId + '/view';
+      : proto + '://' + host + '/api/file?id=' + fileId;
 
     return res.status(200).json({ url, fileId });
   } catch (err) {
