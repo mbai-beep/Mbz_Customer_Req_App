@@ -9,10 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#EAF4F8;min-height:100vh;display:flex;flex-direction:column;align-items:center}
 .hidden{display:none!important}
 /* ── HEADER ── */
-.app-header{width:100%;max-width:600px;background:linear-gradient(135deg,#C8E6C9,#2e7d32);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.app-header{width:100%;max-width:600px;background:linear-gradient(135deg,#8DBBCC,#8DBBCC);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .app-header .title{font-size:17px;font-weight:700;letter-spacing:.3px}
 .app-header .subtitle{font-size:11px;opacity:.8;margin-top:1px}
 .app-header .user-badge{font-size:11px;background:rgba(255,255,255,.18);border-radius:20px;padding:4px 10px;text-align:right;max-width:140px;word-break:break-word}
@@ -20,62 +20,62 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 .page{width:100%;max-width:600px;padding:0 0 80px;flex:1}
 /* ── LOGIN ── */
 #loginSection{width:100%;max-width:600px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
-.login-hero{width:100%;background:linear-gradient(135deg,#C8E6C9,#2e7d32);color:#fff;padding:40px 20px 30px;text-align:center}
+.login-hero{width:100%;background:linear-gradient(135deg,#8DBBCC,#8DBBCC);color:#fff;padding:40px 20px 30px;text-align:center}
 .login-hero .logo{font-size:52px;margin-bottom:8px}
 .login-hero h1{font-size:22px;font-weight:700}
 .login-hero p{font-size:13px;opacity:.8;margin-top:4px}
 .login-card{background:#fff;border-radius:18px 18px 0 0;margin-top:-12px;width:100%;padding:28px 24px;flex:1}
-.login-card h2{font-size:18px;font-weight:700;color:#C8E6C9;margin-bottom:4px}
+.login-card h2{font-size:18px;font-weight:700;color:#8DBBCC;margin-bottom:4px}
 .login-card p{font-size:13px;color:#777;margin-bottom:20px}
 /* ── FORM ELEMENTS ── */
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
 .field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;outline:none;transition:border-color .2s;background:#fff;color:#333;appearance:none;-webkit-appearance:none}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:#2e7d32}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#8DBBCC}
 .field textarea{resize:vertical;min-height:80px;font-family:inherit}
 .field .pw-wrap{position:relative}
 .field .pw-wrap input{padding-right:44px}
 .field .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#999;padding:4px}
 .field .input-hint{font-size:11px;color:#999;margin-top:4px}
 .checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:16px}
-.checkbox-row input[type=checkbox]{width:18px;height:18px;accent-color:#2e7d32;cursor:pointer}
+.checkbox-row input[type=checkbox]{width:18px;height:18px;accent-color:#8DBBCC;cursor:pointer}
 .checkbox-row label{font-size:14px;color:#555;cursor:pointer}
 /* ── BUTTONS ── */
 .btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
-.btn-primary{background:linear-gradient(135deg,#2e7d32,#388e3c);color:#fff}
-.btn-primary:hover{background:linear-gradient(135deg,#C8E6C9,#2e7d32)}
+.btn-primary{background:#F1F3F5;color:#2c2c2c;border:1.5px solid #c0cdd4}
+.btn-primary:hover{background:#e2e6ea}
 .btn-primary:active{transform:scale(.98)}
-.btn-secondary{background:#f0f4f0;color:#2e7d32;border:1.5px solid #2e7d32}
+.btn-secondary{background:#EAF4F8;color:#8DBBCC;border:1.5px solid #8DBBCC}
 .btn-sm{width:auto;display:inline-block;padding:7px 14px;font-size:13px;border-radius:8px;font-weight:600}
 .btn-danger{background:#c62828;color:#fff}
 .btn-danger:hover{background:#b71c1c}
 .btn-gray{background:#f5f5f5;color:#555;border:1px solid #ddd}
-.link-btn{background:none;border:none;color:#2e7d32;font-size:14px;cursor:pointer;text-decoration:underline;padding:0}
-.link-btn:hover{color:#C8E6C9}
+.link-btn{background:none;border:none;color:#8DBBCC;font-size:14px;cursor:pointer;text-decoration:underline;padding:0}
+.link-btn:hover{color:#8DBBCC}
 /* ── CARD ── */
 .card{background:#fff;border-radius:14px;padding:16px;margin:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.card-title{font-size:13px;font-weight:700;color:#C8E6C9;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-title{font-size:13px;font-weight:700;color:#8DBBCC;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 /* ── NAV TABS ── */
 .nav-tabs{width:100%;max-width:600px;background:#fff;display:flex;box-shadow:0 2px 6px rgba(0,0,0,.1);position:sticky;top:56px;z-index:99}
 .nav-tab{flex:1;padding:12px 8px;border:none;background:none;font-size:13px;font-weight:600;color:#999;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s}
-.nav-tab.active{color:#2e7d32;border-bottom-color:#2e7d32}
+.nav-tab.active{color:#8DBBCC;border-bottom-color:#8DBBCC}
 /* ── TOAST ── */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:340px;text-align:center}
 #toast.show{opacity:1}
-#toast.success{background:#2e7d32}
+#toast.success{background:#8DBBCC}
 #toast.error{background:#c62828}
 /* ── REQUIREMENT CHECKLIST ── */
 .req-section{margin-bottom:12px;border:1.5px solid #e8e8e8;border-radius:12px;overflow:hidden}
-.req-section-header{background:#E8F5E9;padding:10px 14px;font-size:13px;font-weight:700;color:#C8E6C9;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
-.req-section-header .sno{background:#C8E6C9;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.req-section-header{background:#E3F2F8;padding:10px 14px;font-size:13px;font-weight:700;color:#8DBBCC;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
+.req-section-header .sno{background:#8DBBCC;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px}
 .chip{padding:8px 14px;border-radius:24px;border:2px solid #ddd;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:#fff;color:#444;user-select:none;-webkit-user-select:none;min-height:38px;display:inline-flex;align-items:center}
-.chip.selected{background:#E8F5E9;border-color:#2e7d32;color:#1a1a1a;font-weight:700;box-shadow:0 2px 6px rgba(46,125,50,.25)}
+.chip.selected{background:#E3F2F8;border-color:#8DBBCC;color:#1a1a1a;font-weight:700;box-shadow:0 2px 6px rgba(141,187,204,.25)}
 .chip.others-chip{border-style:dashed;border-color:#aaa;color:#666}
-.chip.others-chip.selected{background:#C8E6C9;border-color:#2e7d32;border-style:solid;color:#C8E6C9}
+.chip.others-chip.selected{background:#8DBBCC;border-color:#8DBBCC;border-style:solid;color:#8DBBCC}
 .chip:active{transform:scale(.95)}
 .others-input-wrap{display:none;padding:4px 10px 10px}
-.others-input-wrap input{width:100%;padding:10px 12px;border:2px solid #2e7d32;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#F1F8F4}
+.others-input-wrap input{width:100%;padding:10px 12px;border:2px solid #8DBBCC;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#E3F2F8}
 .others-input-wrap input::placeholder{color:#bbb}
 /* ── AUDIO ── */
 .audio-section{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -97,25 +97,25 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 .entry-body{padding:0 14px 12px;border-top:1px solid #f0f0f0}
 .status-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
 .status-pending{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
-.status-fulfilled{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.status-fulfilled{background:#E3F2F8;color:#8DBBCC;border:1px solid #8DBBCC}
 .status-not{background:#fce4ec;color:#c62828;border:1px solid #ef9a9a}
 .status-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .req-summary{font-size:12px;color:#555;margin-top:8px;line-height:1.6}
-.req-summary strong{color:#C8E6C9}
+.req-summary strong{color:#8DBBCC}
 /* ── FORGOT PASSWORD ── */
 .forgot-card{background:#fff;border-radius:14px;margin:16px 12px;padding:24px 20px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.forgot-card h2{font-size:18px;font-weight:700;color:#C8E6C9;margin-bottom:6px}
+.forgot-card h2{font-size:18px;font-weight:700;color:#8DBBCC;margin-bottom:6px}
 .forgot-card p{font-size:13px;color:#777;margin-bottom:18px}
 .step-indicator{display:flex;gap:8px;margin-bottom:20px}
 .step-dot{width:28px;height:4px;border-radius:2px;background:#e0e0e0}
-.step-dot.active{background:#2e7d32}
+.step-dot.active{background:#8DBBCC}
 .otp-inputs{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
 .otp-inputs input{width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid #ddd;border-radius:10px;outline:none}
-.otp-inputs input:focus{border-color:#2e7d32}
+.otp-inputs input:focus{border-color:#8DBBCC}
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal{background:#fff;border-radius:18px;padding:24px 20px;width:100%;max-width:420px}
-.modal h3{font-size:18px;font-weight:700;color:#C8E6C9;margin-bottom:6px}
+.modal h3{font-size:18px;font-weight:700;color:#8DBBCC;margin-bottom:6px}
 .modal p{font-size:13px;color:#777;margin-bottom:18px}
 /* ── LOADERS ── */
 .spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
@@ -127,8 +127,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 .req-type-btn .rt-icon{font-size:22px}
 .req-type-btn .rt-label{font-size:14px;font-weight:700;color:#333}
 .req-type-btn .rt-sub{font-size:11px;color:#888;margin-top:1px}
-.req-type-btn.selected{border-color:#2e7d32;background:#E8F5E9;box-shadow:0 0 0 2px #2e7d32}
-.req-type-btn.selected .rt-label{color:#C8E6C9}
+.req-type-btn.selected{border-color:#8DBBCC;background:#E3F2F8;box-shadow:0 0 0 2px #8DBBCC}
+.req-type-btn.selected .rt-label{color:#8DBBCC}
 /* ── MISC ── */
 .divider{height:1px;background:#f0f0f0;margin:10px 0}
 .section-gap{height:10px}
@@ -342,7 +342,7 @@ select option:disabled{color:#bbb}
     <div style="margin-bottom:20px">
       <button class="btn btn-primary" id="addEmpToggleBtn" onclick="showAddEmpForm()" style="width:100%;padding:12px 16px;font-size:0.95rem">&#x2795; Add New Employee</button>
       <div id="addEmpForm" class="hidden" style="border:1px solid #ddd;border-radius:8px;padding:14px;margin-top:8px;background:#f9f9f9">
-        <h4 style="margin:0 0 12px;color:#C8E6C9;font-size:0.9rem">New Employee Details</h4>
+        <h4 style="margin:0 0 12px;color:#8DBBCC;font-size:0.9rem">New Employee Details</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div class="field"><label>Employee ID *</label><input type="number" id="addEmpCode" placeholder="e.g. 1001"></div>
           <div class="field"><label>Role</label><select id="addEmpRole"><option value="employee">Employee</option><option value="manager">Manager</option></select></div>
@@ -370,7 +370,7 @@ select option:disabled{color:#bbb}
     </div>
     <!-- Search & Manage Employee -->
     <div>
-      <h3 style="margin:0 0 10px;font-size:0.95rem;color:#C8E6C9">&#x1F50D; Manage Employee Access</h3>
+      <h3 style="margin:0 0 10px;font-size:0.95rem;color:#8DBBCC">&#x1F50D; Manage Employee Access</h3>
       <div style="display:flex;gap:8px">
         <input type="number" id="searchEmpCode" placeholder="Enter Employee ID" style="flex:1;padding:10px 12px;border:1px solid #ccc;border-radius:6px;font-size:0.9rem" onkeydown="if(event.key==='Enter')searchEmployee()">
         <button class="btn btn-primary" onclick="searchEmployee()" style="white-space:nowrap;padding:10px 16px">Search</button>
@@ -761,11 +761,11 @@ function renderEmployeeResult(e) {
     (e.emp_mobile ? '<div style="font-size:0.8rem;color:#888">&#x1F4F1; ' + e.emp_mobile + '</div>' : '') +
     '<div style="font-size:0.75rem;color:#aaa;margin-top:2px">Role: ' + (e.role || 'employee') + '</div>' +
     '</div>' +
-    '<span style="padding:4px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;background:' + (isActive ? '#e8f5e9' : '#ffebee') + ';color:' + (isActive ? '#2e7d32' : '#c62828') + '">' + e.store_status + '</span>' +
+    '<span style="padding:4px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;background:' + (isActive ? '#E3F2F8' : '#ffebee') + ';color:' + (isActive ? '#8DBBCC' : '#c62828') + '">' + e.store_status + '</span>' +
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn btn-secondary btn-sm" data-code="' + e.emp_code + '" data-name="' + safeName + '" onclick="adminResetPwd(this.dataset.code, this.dataset.name)">&#x1F511; Reset Password</button>' +
-    '<button class="btn btn-sm" data-code="' + e.emp_code + '" data-status="' + e.store_status + '" onclick="adminToggleStatus(this.dataset.code, this.dataset.status)" style="background:' + (isActive ? '#fff3e0' : '#e8f5e9') + ';color:' + (isActive ? '#e65100' : '#2e7d32') + ';border:1px solid ' + (isActive ? '#ffcc80' : '#a5d6a7') + '">' + (isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate') + '</button>' +
+    '<button class="btn btn-sm" data-code="' + e.emp_code + '" data-status="' + e.store_status + '" onclick="adminToggleStatus(this.dataset.code, this.dataset.status)" style="background:' + (isActive ? '#fff3e0' : '#E3F2F8') + ';color:' + (isActive ? '#e65100' : '#8DBBCC') + ';border:1px solid ' + (isActive ? '#ffcc80' : '#8DBBCC') + '">' + (isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate') + '</button>' +
     '</div></div>';
 }
 
@@ -889,7 +889,7 @@ async function sendOTP() {
     if (!r.success) return showToast(r.error || 'Failed to send OTP', 'error');
     showForgotStep(2);
     if (r.demo) {
-      document.getElementById('otpSentMsg').innerHTML = `&#x26A0; <strong>Demo Mode:</strong> SMS not configured. Your OTP is: <strong style="color:#2e7d32;font-size:20px">${r.otp}</strong>`;
+      document.getElementById('otpSentMsg').innerHTML = `&#x26A0; <strong>Demo Mode:</strong> SMS not configured. Your OTP is: <strong style="color:#8DBBCC;font-size:20px">${r.otp}</strong>`;
     } else {
       document.getElementById('otpSentMsg').textContent = `OTP sent to ****${mobile.slice(-4)}. Valid for 5 minutes.`;
     }
@@ -1230,30 +1230,30 @@ function esc(s) {
 
 <style>
 /* ── MEENA BAZAAR BRAND THEME v5 – Dark Forest Green ── */
-body { background: #f0f4f0 !important; }
+body { background: #EAF4F8 !important; }
 
 /* Header & Hero: restore dark green gradient */
-.app-header { background: linear-gradient(135deg,#C8E6C9,#2e7d32) !important; color: #fff !important; }
+.app-header { background: linear-gradient(135deg,#8DBBCC,#8DBBCC) !important; color: #fff !important; }
 .app-header .title,
 .app-header .subtitle { color: #fff !important; }
-.login-hero { background: linear-gradient(135deg,#C8E6C9,#2e7d32) !important; color: #fff !important; }
+.login-hero { background: linear-gradient(135deg,#8DBBCC,#8DBBCC) !important; color: #fff !important; }
 .login-hero h1,
 .login-hero p { color: #fff !important; }
 
 /* Logo banner: dark green */
-.mb-logo-banner { background: linear-gradient(135deg,#C8E6C9,#2e7d32); padding: 22px 20px 14px; text-align: center; }
+.mb-logo-banner { background: transparent; padding: 22px 20px 14px; text-align: center; }
 .mb-logo-img { height: 90px; width: auto; max-width: 100%; display: block; margin: 0 auto; }
-.mb-logo-text { font-family: 'Sacramento', cursive; font-size: 54px; color: #fff; line-height: 1.2; }
+.mb-logo-text { font-family: 'Sacramento', cursive; font-size: 54px; color: #2c2c2c; line-height: 1.2; }
 
 /* Primary button: dark green */
 .btn-primary {
-  background: linear-gradient(135deg,#2e7d32,#388e3c) !important;
-  color: #fff !important;
+  background: #F1F3F5 !important;
+  color: #2c2c2c !important;
   font-weight: 700 !important;
-  border: none !important;
-  box-shadow: 0 3px 0 #C8E6C9 !important;
+  border: 1.5px solid #c0cdd4 !important;
+  box-shadow: 0 3px 0 #b0bec5 !important;
 }
-.btn-primary:hover { background: linear-gradient(135deg,#C8E6C9,#2e7d32) !important; }
+.btn-primary:hover { background: #e2e6ea !important; }
 .btn-primary:active { transform: translateY(2px); box-shadow: none !important; }
 
 /* Card headings */
@@ -1261,7 +1261,7 @@ body { background: #f0f4f0 !important; }
 .forgot-card h2,
 .modal h3,
 .card-title,
-.req-summary strong { color: #C8E6C9 !important; }
+.req-summary strong { color: #8DBBCC !important; }
 
 /* Forgot password link */
 .link-btn { color: #C61E32 !important; }
@@ -1273,24 +1273,24 @@ body { background: #f0f4f0 !important; }
 .field textarea { background: #F5EFE6 !important; }
 .field input:focus,
 .field select:focus,
-.field textarea:focus { border-color: #2e7d32 !important; background: #fff !important; box-shadow: 0 0 0 2px rgba(46,125,50,.2) !important; }
+.field textarea:focus { border-color: #8DBBCC !important; background: #fff !important; box-shadow: 0 0 0 2px rgba(141,187,204,.2) !important; }
 
 /* Status badges */
-.status-fulfilled { background: #E8F5E9 !important; color: #C8E6C9 !important; border-color: #2e7d32 !important; }
+.status-fulfilled { background: #E3F2F8 !important; color: #8DBBCC !important; border-color: #8DBBCC !important; }
 
 /* Checklist section headers */
-.req-section-header { background: #E8F5E9 !important; color: #C8E6C9 !important; }
+.req-section-header { background: #E3F2F8 !important; color: #8DBBCC !important; }
 
 /* Bottom nav */
-.bottom-nav { background: #fff !important; border-top: 2px solid #2e7d32 !important; }
+.bottom-nav { background: #fff !important; border-top: 2px solid #8DBBCC !important; }
 .bottom-nav .nav-btn { color: #555 !important; }
-.bottom-nav .nav-btn.active { color: #2e7d32 !important; }
+.bottom-nav .nav-btn.active { color: #8DBBCC !important; }
 
 /* Page tabs */
-.page-tabs .tab-btn.active { border-bottom-color: #2e7d32 !important; color: #C8E6C9 !important; }
+.page-tabs .tab-btn.active { border-bottom-color: #8DBBCC !important; color: #8DBBCC !important; }
 
 /* Login card accent */
-.login-card { border-top: 3px solid #2e7d32 !important; }
+.login-card { border-top: 3px solid #8DBBCC !important; }
 </style>
 </body>
 </html>
