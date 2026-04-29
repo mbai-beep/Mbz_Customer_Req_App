@@ -65,13 +65,18 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 #toast.success{background:#2e7d32}
 #toast.error{background:#c62828}
 /* ── REQUIREMENT CHECKLIST ── */
-.req-section{margin-bottom:10px;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden}
-.req-section-header{background:#e8f5e9;padding:8px 12px;font-size:12px;font-weight:700;color:#1b5e20;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.4px}
-.req-section-header .sno{background:#2e7d32;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 10px}
-.chip{padding:5px 10px;border-radius:20px;border:1.5px solid #ccc;font-size:12px;cursor:pointer;transition:all .15s;background:#fff;color:#555;user-select:none;-webkit-user-select:none}
-.chip.selected{background:#2e7d32;border-color:#2e7d32;color:#fff;font-weight:600}
+.req-section{margin-bottom:12px;border:1.5px solid #e8e8e8;border-radius:12px;overflow:hidden}
+.req-section-header{background:#FDD32C;padding:10px 14px;font-size:13px;font-weight:700;color:#333;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
+.req-section-header .sno{background:#1b5e20;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px}
+.chip{padding:8px 14px;border-radius:24px;border:2px solid #ddd;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:#fff;color:#444;user-select:none;-webkit-user-select:none;min-height:38px;display:inline-flex;align-items:center}
+.chip.selected{background:#FDD32C;border-color:#e6bd00;color:#1a1a1a;font-weight:700;box-shadow:0 2px 6px rgba(253,211,44,.4)}
+.chip.others-chip{border-style:dashed;border-color:#aaa;color:#666}
+.chip.others-chip.selected{background:#fff3cd;border-color:#e6bd00;border-style:solid;color:#333}
 .chip:active{transform:scale(.95)}
+.others-input-wrap{display:none;padding:4px 10px 10px}
+.others-input-wrap input{width:100%;padding:10px 12px;border:2px solid #FDD32C;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fffbe6}
+.others-input-wrap input::placeholder{color:#bbb}
 /* ── AUDIO ── */
 .audio-section{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .rec-btn{padding:10px 18px;border-radius:24px;border:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
@@ -434,15 +439,15 @@ select option:disabled{color:#bbb}
 <script>
 // ─── CONSTANTS ───────────────────────────────────────
 const REQUIREMENTS = [
-  { id:1, name:'OCCASION', items:['Wedding (Bridal)','Wedding (Guest)','Festival / Puja','Party / Event','Office / Formal','Engagement / Ceremony','Anniversary','Casual / Daily'] },
-  { id:2, name:'COLOR PREFERENCE', items:['Red / Maroon','Pink / Peach','Blue / Navy','Green / Bottle Green','Yellow / Mustard','Orange','Purple / Violet','White / Cream','Black','Multi-colour'] },
-  { id:3, name:'FABRIC CHOICE', items:['Silk','Banarasi Silk','Kanjivaram','Cotton','Georgette','Chiffon','Net','Linen','Chanderi','Organza'] },
-  { id:4, name:'CONCEPT', items:['Traditional / Classic','Modern / Contemporary','Fusion / Indo-Western','Bridal (Heavy Work)','Embroidered','Printed / Digital','Plain / Minimalist'] },
-  { id:5, name:'BUDGET RANGE', items:['Under \u20B95,000','\u20B95,000 \u2013 \u20B910,000','\u20B910,000 \u2013 \u20B920,000','\u20B920,000 \u2013 \u20B950,000','Above \u20B950,000'] },
-  { id:6, name:'SIZE FIT', items:['XS / S (32\u201334)','M (36\u201338)','L (40\u201342)','XL (44\u201346)','XXL (48+)','Custom Stitching','Ready to Wear'] },
-  { id:7, name:'DUPATTA STYLE', items:['With Dupatta','Without Dupatta','Heavy Embroidered','Plain / Light','Printed','Not Applicable'] },
-  { id:8, name:'SEASON / CLIMATE', items:['Summer (Light)','Winter (Heavy)','Monsoon','All Season'] },
-  { id:9, name:'TIME PERIOD', items:['Urgent (3 Days)','Within 1 Week','2 Weeks','1 Month','1\u20133 Months','No Rush'] }
+  { id:1, name:'OCCASION', items:['Wedding (Bridal)','Wedding (Guest)','Festival / Puja','Party / Event','Office / Formal','Casual / Daily','Others'] },
+  { id:2, name:'COLOR PREFERENCE', items:['Red / Maroon','Pink / Peach','Blue / Navy','Green / Bottle Green','Yellow / Mustard','Orange','Purple / Violet','Black','Multi-colour','Others'] },
+  { id:3, name:'FABRIC CHOICE', items:['Silk','Banarasi Silk','Kanjivaram','Cotton','Georgette','Chiffon','Linen','Chanderi','Organza','Dola Silk','Others'] },
+  { id:4, name:'CONCEPT', items:['Traditional / Classic','Bridal (Heavy Work)','Embroidered','Printed / Digital','Plain / Minimalist','Value Priced','Others'] },
+  { id:5, name:'BUDGET RANGE', items:['Under ₹3,000','Under ₹5,000','₹5,000–₹10,000','₹10,000–₹20,000','₹20,000–₹50,000','Above ₹50,000','Others'] },
+  { id:6, name:'SIZE FIT', items:['M (36–38)','L (40–42)','XL (44–46)','XXL (48+)','3XL','Custom Stitching','Ready to Wear','Others'] },
+  { id:7, name:'DUPATTA STYLE', items:['With Dupatta','Without Dupatta','Heavy Embroidered','Plain / Light','Printed','Not Applicable','Others'] },
+  { id:8, name:'SEASON / CLIMATE', items:['Summer (Light)','Winter (Heavy)','All Season','Others'] },
+  { id:9, name:'TIME PERIOD', items:['Urgent (5 Days)','Within 1 Week','2 Weeks','1 Month','1–3 Months','No Rush','Others'] }
 ];
 
 // ─── STATE ───────────────────────────────────────────
@@ -599,34 +604,60 @@ function buildChecklist() {
     selections[cat.name] = [];
     const sec = document.createElement('div');
     sec.className = 'req-section';
-    sec.innerHTML = `<div class="req-section-header"><span class="sno">${cat.id}</span>${cat.name}</div>
-      <div class="chips" id="chips_${cat.id}"></div>`;
+    sec.innerHTML = '<div class="req-section-header"><span class="sno">' + cat.id + '</span>' + cat.name + '</div>'
+      + '<div class="chips" id="chips_' + cat.id + '"></div>'
+      + '<div class="others-input-wrap" id="othersWrap_' + cat.id + '">'
+      + '<input type="text" id="othersInput_' + cat.id + '" placeholder="Please type details here... (required)">'
+      + '</div>';
     container.appendChild(sec);
     const chips = sec.querySelector('.chips');
     cat.items.forEach(item => {
       const chip = document.createElement('span');
-      chip.className = 'chip';
-      chip.textContent = item;
-      chip.onclick = () => toggleChip(cat.name, item, chip);
+      chip.className = item === 'Others' ? 'chip others-chip' : 'chip';
+      chip.textContent = item === 'Others' ? '\u270F\uFE0F Others' : item;
+      chip.onclick = () => toggleChip(cat.name, cat.id, item, chip);
       chips.appendChild(chip);
     });
   });
 }
-function toggleChip(catName, item, el) {
+function toggleChip(catName, catId, item, el) {
   const arr = selections[catName];
   const idx = arr.indexOf(item);
   if (idx === -1) { arr.push(item); el.classList.add('selected'); }
-  else { arr.splice(idx,1); el.classList.remove('selected'); }
+  else { arr.splice(idx, 1); el.classList.remove('selected'); }
+  if (item === 'Others') {
+    const wrap = document.getElementById('othersWrap_' + catId);
+    if (wrap) {
+      wrap.style.display = arr.includes('Others') ? 'block' : 'none';
+      if (arr.includes('Others')) document.getElementById('othersInput_' + catId).focus();
+    }
+  }
 }
 function getChecklistJson() {
   const result = {};
-  REQUIREMENTS.forEach(cat => { if (selections[cat.name].length) result[cat.name] = selections[cat.name]; });
+  REQUIREMENTS.forEach(cat => {
+    if (selections[cat.name].length) {
+      const items = selections[cat.name].map(item => {
+        if (item === 'Others') {
+          const inp = document.getElementById('othersInput_' + cat.id);
+          const txt = inp ? inp.value.trim() : '';
+          return txt ? 'Others: ' + txt : 'Others';
+        }
+        return item;
+      });
+      result[cat.name] = items;
+    }
+  });
   return result;
 }
 function resetChecklist() {
   REQUIREMENTS.forEach(cat => {
     selections[cat.name] = [];
-    document.querySelectorAll(`#chips_${cat.id} .chip`).forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('#chips_' + cat.id + ' .chip').forEach(c => c.classList.remove('selected'));
+    const wrap = document.getElementById('othersWrap_' + cat.id);
+    if (wrap) wrap.style.display = 'none';
+    const inp = document.getElementById('othersInput_' + cat.id);
+    if (inp) inp.value = '';
   });
   document.getElementById('otherReqText').value = '';
 }
@@ -933,6 +964,15 @@ async function submitRequirement() {
   if (!storeCode) return showToast('Select store code', 'error');
   if (!requirementType) return showToast('Please select Requirement Type (Existing or New)', 'error');
   if (!hasChecklist && !otherText) return showToast('Please select at least one requirement or fill Other Requirements', 'error');
+  // Validate "Others" text fields
+  for (const cat of REQUIREMENTS) {
+    if (selections[cat.name] && selections[cat.name].includes('Others')) {
+      const inp = document.getElementById('othersInput_' + cat.id);
+      if (!inp || !inp.value.trim()) {
+        return showToast('Please fill in details for "Others" in: ' + cat.name, 'error');
+      }
+    }
+  }
 
   setLoading('submitBtn', true, 'Submitting...');
   try {
