@@ -66,16 +66,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 #toast.error{background:#c62828}
 /* ── REQUIREMENT CHECKLIST ── */
 .req-section{margin-bottom:12px;border:1.5px solid #e8e8e8;border-radius:12px;overflow:hidden}
-.req-section-header{background:#FDD32C;padding:10px 14px;font-size:13px;font-weight:700;color:#333;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
+.req-section-header{background:#E6F7F1;padding:10px 14px;font-size:13px;font-weight:700;color:#333;display:flex;align-items:center;gap:8px;letter-spacing:.2px}
 .req-section-header .sno{background:#1b5e20;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px}
 .chip{padding:8px 14px;border-radius:24px;border:2px solid #ddd;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:#fff;color:#444;user-select:none;-webkit-user-select:none;min-height:38px;display:inline-flex;align-items:center}
-.chip.selected{background:#FDD32C;border-color:#e6bd00;color:#1a1a1a;font-weight:700;box-shadow:0 2px 6px rgba(253,211,44,.4)}
+.chip.selected{background:#E6F7F1;border-color:#5bbda0;color:#1a1a1a;font-weight:700;box-shadow:0 2px 6px rgba(100,200,170,.35)}
 .chip.others-chip{border-style:dashed;border-color:#aaa;color:#666}
-.chip.others-chip.selected{background:#fff3cd;border-color:#e6bd00;border-style:solid;color:#333}
+.chip.others-chip.selected{background:#d8f5ec;border-color:#5bbda0;border-style:solid;color:#333}
 .chip:active{transform:scale(.95)}
 .others-input-wrap{display:none;padding:4px 10px 10px}
-.others-input-wrap input{width:100%;padding:10px 12px;border:2px solid #FDD32C;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#fffbe6}
+.others-input-wrap input{width:100%;padding:10px 12px;border:2px solid #7dd3ba;border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:#f0faf7}
 .others-input-wrap input::placeholder{color:#bbb}
 /* ── AUDIO ── */
 .audio-section{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -127,7 +127,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f0;min-height:100vh
 .req-type-btn .rt-icon{font-size:22px}
 .req-type-btn .rt-label{font-size:14px;font-weight:700;color:#333}
 .req-type-btn .rt-sub{font-size:11px;color:#888;margin-top:1px}
-.req-type-btn.selected{border-color:#FDD32C;background:#fffbe6;box-shadow:0 0 0 2px #FDD32C}
+.req-type-btn.selected{border-color:#7dd3ba;background:#f0faf7;box-shadow:0 0 0 2px #7dd3ba}
 .req-type-btn.selected .rt-label{color:#1b5e20}
 /* ── MISC ── */
 .divider{height:1px;background:#f0f0f0;margin:10px 0}
@@ -1233,10 +1233,10 @@ function esc(s) {
 /* Header/Hero: #FDD32C (Yellow) | Buttons: #CCD96F (Lime Green) */
 /* Red #C61E32 only for Forgot Password link | BG: #EAE7DB */
 body { background: #E6F7F1 !important; }
-.app-header { background: #FDD32C !important; color: #333333 !important; }
+.app-header { background: #E6F7F1 !important; color: #333333 !important; }
 .app-header .title,
 .app-header .subtitle { color: #333333 !important; }
-.login-hero { background: #FDD32C !important; color: #333333 !important; }
+.login-hero { background: #E6F7F1 !important; color: #333333 !important; }
 .login-hero h1,
 .login-hero p { color: #333333 !important; }
 .btn-primary {
@@ -1262,8 +1262,8 @@ body { background: #E6F7F1 !important; }
 .field select:focus,
 .field textarea:focus { border-color: #90caf9 !important; background: #fff !important; box-shadow: 0 0 0 2px rgba(144,202,249,.25) !important; }
 .status-fulfilled { background: #f5fae0 !important; color: #4a6000 !important; border-color: #CCD96F !important; }
-.req-section-header { background: #FDD32C !important; color: #333333 !important; }
-.bottom-nav { background: #FDD32C !important; border-top: 2px solid #e6bd00 !important; }
+.req-section-header { background: #E6F7F1 !important; color: #333333 !important; }
+.bottom-nav { background: #E6F7F1 !important; border-top: 2px solid #7dd3ba !important; }
 .bottom-nav .nav-btn { color: #555 !important; }
 .bottom-nav .nav-btn.active { color: #C61E32 !important; }
 .page-tabs .tab-btn.active { border-bottom-color: #CCD96F !important; color: #333333 !important; }
