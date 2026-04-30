@@ -259,10 +259,12 @@ select option:disabled{color:#bbb}
         <input type="tel" id="custMobile" placeholder="10-digit mobile" maxlength="10" inputmode="tel"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="field"><label>Store Name <span style="color:#c62828">*</span></label>
-          <select id="custStoreName" onchange="storeNameChange()"><option value="">Select store...</option></select>
+          <input list="storeNameList" id="custStoreName" placeholder="Search store..." autocomplete="off" oninput="storeNameInputChange(this)">
+          <datalist id="storeNameList"></datalist>
         </div>
         <div class="field"><label>Store Code <span style="color:#c62828">*</span></label>
-          <select id="custStoreCode" onchange="storeCodeChange()"><option value="">Select code...</option></select>
+          <input list="storeCodeList" id="custStoreCode" placeholder="Search code..." autocomplete="off" oninput="storeCodeInputChange(this)">
+          <datalist id="storeCodeList"></datalist>
         </div>
       </div>
     </div>
@@ -271,15 +273,15 @@ select option:disabled{color:#bbb}
     <div class="card">
       <div class="card-title">&#x1F4CC; Requirement Type <span style="color:#c62828;font-size:12px;font-weight:400;margin-left:4px">* Required</span></div>
       <div class="req-type-row">
-        <div class="req-type-btn" id="rtExisting" onclick="setReqType('Existing')">
+        <div class="req-type-btn" id="rtOld" onclick="setReqType('Old Requirement')">
           <span class="rt-icon">&#x1F504;</span>
-          <span class="rt-label">Existing</span>
-          <span class="rt-sub">Customer has shopped before</span>
+          <span class="rt-label">Old Requirement</span>
+          <span class="rt-sub">Customer visited before</span>
         </div>
-        <div class="req-type-btn" id="rtNew" onclick="setReqType('New')">
+        <div class="req-type-btn" id="rtNew" onclick="setReqType('New Requirement')">
           <span class="rt-icon">&#x2728;</span>
-          <span class="rt-label">New</span>
-          <span class="rt-sub">First-time customer</span>
+          <span class="rt-label">New Requirement</span>
+          <span class="rt-sub">Fresh customer requirement</span>
         </div>
       </div>
     </div>
@@ -472,17 +474,22 @@ let fpEmpCodeVal = '';
 // ─── AUTH STORAGE HELPERS (localStorage + cookie fallback for iOS) ───
   function saveAuthToken(tk) {
     try { localStorage.setItem('mb_token', tk); } catch(e) {}
+    try { sessionStorage.setItem('mb_token_s', tk); } catch(e) {}
     const d = new Date(Date.now() + 30*24*60*60*1000);
-    document.cookie = 'mb_tok=' + encodeURIComponent(tk) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+    const sec = location.protocol === 'https:' ? ';Secure' : '';
+    document.cookie = 'mb_tok=' + encodeURIComponent(tk) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax' + sec;
   }
   function getAuthToken() {
     try { const v = localStorage.getItem('mb_token'); if (v) return v; } catch(e) {}
+    try { const v = sessionStorage.getItem('mb_token_s'); if (v) return v; } catch(e) {}
     const m = document.cookie.match(/(?:^|;\s*)mb_tok=([^;]+)/);
     return m ? decodeURIComponent(m[1]) : null;
   }
   function clearAuthToken() {
     try { localStorage.removeItem('mb_token'); } catch(e) {}
-    document.cookie = 'mb_tok=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+    try { sessionStorage.removeItem('mb_token_s'); } catch(e) {}
+    const sec = location.protocol === 'https:' ? ';Secure' : '';
+    document.cookie = 'mb_tok=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax' + sec;
   }
 
   // ─── INIT ─────────────────────────────────────────────
@@ -549,21 +556,15 @@ async function initApp() {
   if (currentUser.role === 'manager') document.getElementById('submissionsLabel').textContent = 'All Submissions';
   if (currentUser.role === 'admin') {
     document.getElementById('tabAdmin').classList.remove('hidden');
-    showView('admin');
   }
+  showView('newReq');
 
   await loadStores();
 
   // Pre-fill store from profile
   if (currentUser.storeName) {
-    const sn = document.getElementById('custStoreName');
-    const sc = document.getElementById('custStoreCode');
-    for (let i = 0; i < sn.options.length; i++) {
-      if (sn.options[i].value === currentUser.storeName) { sn.selectedIndex = i; break; }
-    }
-    for (let i = 0; i < sc.options.length; i++) {
-      if (sc.options[i].value === currentUser.storeCode) { sc.selectedIndex = i; break; }
-    }
+    document.getElementById('custStoreName').value = currentUser.storeName;
+    if (currentUser.storeCode) document.getElementById('custStoreCode').value = currentUser.storeCode;
   }
 
   if (currentUser.isFirstLogin) {
@@ -575,25 +576,24 @@ async function initApp() {
 async function loadStores() {
   try {
     const r = await apiFetch('/api/stores', 'GET');
-    allStores = r.stores || [];
+    allStores = (r.stores || []).sort((a,b) => String(a.code).localeCompare(String(b.code), undefined, {numeric:true}));
   } catch { allStores = []; }
-
-  const sn = document.getElementById('custStoreName');
-  const sc = document.getElementById('custStoreCode');
-  [sn, sc].forEach(el => { while (el.options.length > 1) el.remove(1); });
-  allStores.forEach(s => {
-    sn.add(new Option(s.name, s.name));
-    sc.add(new Option(s.code, s.code));
-  });
+  const nameList = document.getElementById('storeNameList');
+  const codeList = document.getElementById('storeCodeList');
+  if (nameList) {
+    nameList.innerHTML = ''; codeList.innerHTML = '';
+    allStores.forEach(s => {
+      const o1 = document.createElement('option'); o1.value = s.name; nameList.appendChild(o1);
+      const o2 = document.createElement('option'); o2.value = s.code; codeList.appendChild(o2);
+    });
+  }
 }
-function storeNameChange() {
-  const name = document.getElementById('custStoreName').value;
-  const store = allStores.find(s => s.name === name);
+function storeNameInputChange(el) {
+  const store = allStores.find(s => s.name === el.value);
   if (store) document.getElementById('custStoreCode').value = store.code;
 }
-function storeCodeChange() {
-  const code = document.getElementById('custStoreCode').value;
-  const store = allStores.find(s => s.code === code);
+function storeCodeInputChange(el) {
+  const store = allStores.find(s => s.code === el.value);
   if (store) document.getElementById('custStoreName').value = store.name;
 }
 
@@ -664,8 +664,8 @@ function resetChecklist() {
 
 function setReqType(type) {
   requirementType = type;
-  document.getElementById('rtExisting').classList.toggle('selected', type === 'Existing');
-  document.getElementById('rtNew').classList.toggle('selected', type === 'New');
+  document.getElementById('rtOld').classList.toggle('selected', type === 'Old Requirement');
+  document.getElementById('rtNew').classList.toggle('selected', type === 'New Requirement');
 }
 
 // ─── LOGIN ────────────────────────────────────────────
@@ -962,7 +962,7 @@ async function submitRequirement() {
   if (!/^\d{10}$/.test(mobile)) return showToast('Enter a valid 10-digit mobile number', 'error');
   if (!storeName) return showToast('Select store name', 'error');
   if (!storeCode) return showToast('Select store code', 'error');
-  if (!requirementType) return showToast('Please select Requirement Type (Existing or New)', 'error');
+  if (!requirementType) return showToast('Please select Requirement Type', 'error');
   if (!hasChecklist && !otherText) return showToast('Please select at least one requirement or fill Other Requirements', 'error');
   // Validate "Others" text fields
   for (const cat of REQUIREMENTS) {
@@ -1031,7 +1031,7 @@ function resetForm() {
   document.getElementById('custMobile').value = '';
   resetChecklist();
   requirementType = '';
-  document.getElementById('rtExisting').classList.remove('selected');
+  document.getElementById('rtOld').classList.remove('selected');
   document.getElementById('rtNew').classList.remove('selected');
   audioBlob = null; audioUploadUrl = ''; audioUploadPromise = Promise.resolve();
   document.getElementById('audioPlayer').classList.add('hidden');
@@ -1054,7 +1054,7 @@ async function startRecording() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioChunks = []; recSeconds = 0;
     const recMime = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
-    mediaRecorder = new MediaRecorder(stream, recMime ? {mimeType:recMime} : {});
+    mediaRecorder = new MediaRecorder(stream, recMime ? {mimeType:recMime,audioBitsPerSecond:32000} : {audioBitsPerSecond:32000});
     mediaRecorder.ondataavailable = e => { if (e.data.size) audioChunks.push(e.data); };
     mediaRecorder.onstop = () => {
       audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType||'audio/webm' });
@@ -1098,26 +1098,54 @@ function stopRecording() {
 }
 
 // ─── PHOTO UPLOAD ─────────────────────────────────────
+async function compressImage(file, maxW=1024, quality=0.72) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+async function uploadWithRetry(payload, retries=3) {
+  for (let i=0; i<retries; i++) {
+    try {
+      const r = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (r.ok) return await r.json();
+    } catch(e) { if (i===retries-1) throw e; await new Promise(r=>setTimeout(r,1200*(i+1))); }
+  }
+}
 async function handlePhotos(e) {
   const files = Array.from(e.target.files);
   if (!files.length) return;
-  document.getElementById('photoUploadStatus').textContent = `Uploading ${files.length} photo(s)...`;
-  for (const file of files) {
+  const statusEl = document.getElementById('photoUploadStatus');
+  let uploaded = 0;
+  for (let fi=0; fi<files.length; fi++) {
+    statusEl.textContent = `Compressing & uploading ${fi+1} of ${files.length}...`;
     try {
+      const compressed = await compressImage(files[fi]);
       const b64 = await new Promise((res,rej) => {
-        const fr = new FileReader(); fr.onload = ev => res(ev.target.result); fr.onerror = rej; fr.readAsDataURL(file);
+        const fr = new FileReader(); fr.onload = ev => res(ev.target.result); fr.onerror = rej; fr.readAsDataURL(compressed);
       });
-      const r = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ fileData: b64, fileName: 'photo_'+Date.now()+'.jpg', mimeType: file.type }) });
-      const d = await r.json();
-      if (d.url) {
+      const d = await uploadWithRetry({ fileData: b64, fileName: 'photo_'+Date.now()+'.jpg', mimeType: 'image/jpeg' });
+      if (d && d.url) {
         photoUrls.push(d.url);
         const img = document.createElement('img');
-        img.src = d.url; img.className = 'photo-thumb'; img.alt = 'Photo';
+        img.src = driveImgUrl(d.url); img.className = 'photo-thumb'; img.alt = 'Photo';
         document.getElementById('photoGrid').insertBefore(img, document.getElementById('photoGrid').lastElementChild);
+        uploaded++;
       }
-    } catch {}
+    } catch { statusEl.textContent = `Retrying photo ${fi+1}...`; }
   }
-  document.getElementById('photoUploadStatus').textContent = `${photoUrls.length} photo(s) uploaded`;
+  statusEl.textContent = `${uploaded} of ${files.length} photo(s) uploaded ✓`;
   e.target.value = '';
 }
 
@@ -1149,7 +1177,15 @@ function buildEntryCard(entry) {
 
   const statusClass = { 'Fulfilled':'status-fulfilled', 'Not_Fulfilled':'status-not', 'Pending':'status-pending' }[entry.fulfillmentStatus] || 'status-pending';
   const statusLabel = { 'Fulfilled':'Fulfilled ✓', 'Not_Fulfilled':'Not Fulfilled ✗', 'Pending':'Pending' }[entry.fulfillmentStatus] || 'Pending';
-  const date = entry.createdAt ? new Date(entry.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+  const date = (() => {
+    if (!entry.createdAt) return '';
+    let d = new Date(entry.createdAt);
+    if (isNaN(d)) {
+      const m = entry.createdAt.match(/^(\d{2})-(\d{2})-(\d{4})/);
+      if (m) d = new Date(m[3], parseInt(m[2])-1, parseInt(m[1]));
+    }
+    return isNaN(d) ? entry.createdAt : d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  })();
 
   let reqSummary = '';
   try {
@@ -1163,7 +1199,7 @@ function buildEntryCard(entry) {
         <div class="entry-name">${esc(entry.customerName)}</div>
         <div class="entry-meta">&#x1F4DE; ${esc(entry.mobileNumber)} &nbsp;&bull;&nbsp; &#x1F3EA; ${esc(entry.storeName)} (${esc(entry.storeCode)})</div>
         <div class="entry-meta">&#x1F464; ${esc(entry.employee)} &nbsp;&bull;&nbsp; &#x1F4C5; ${date}</div>
-        ${entry.requirementType ? `<div class="entry-meta" style="margin-top:3px"><span style="background:${entry.requirementType==='New'?'#e3f2fd':'#fff8e1'};color:${entry.requirementType==='New'?'#1565c0':'#e65100'};border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">${entry.requirementType==='New'?'✨ New Customer':'🔄 Existing Customer'}</span></div>` : ''}
+        ${entry.requirementType ? `<div class="entry-meta" style="margin-top:3px"><span style="background:${entry.requirementType==='New Requirement'?'#e3f2fd':'#fff8e1'};color:${entry.requirementType==='New Requirement'?'#1565c0':'#e65100'};border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">${entry.requirementType==='New Requirement'?'✨ New Requirement':'🔄 Old Requirement'}</span></div>` : ''}
       </div>
       <span class="status-badge ${statusClass}">${statusLabel}</span>
     </div>
