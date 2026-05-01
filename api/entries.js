@@ -137,12 +137,11 @@ module.exports = async function handler(req, res) {
     if (dateFrom) { conditions.push(dateExpr + ' >= ?'); args.push(String(dateFrom)); }
     if (dateTo)   { conditions.push(dateExpr + ' <= ?'); args.push(String(dateTo)); }
 
-    // Both created_at and synced_at stored as "DD-MM-YYYY HH:MM:SS".
-    // Convert to YYYY-MM-DD HH:MM:SS for correct chronological string sort.
-    const orderExpr = "substr(created_at,7,4)||'-'||substr(created_at,4,2)||'-'||substr(created_at,1,2)||substr(created_at,11)";
+    // ORDER BY id DESC: id = "req_<13-digit-UnixMs>_<random>"
+    // Fixed-width timestamp prefix → lexicographic = chronological. Always correct.
     let sql = 'SELECT * FROM entries';
     if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
-    sql += ' ORDER BY ' + orderExpr + ' DESC LIMIT ?';
+    sql += ' ORDER BY id DESC LIMIT ?';
     args.push(pageLimit);
 
     const result = await db.execute({ sql, args });
