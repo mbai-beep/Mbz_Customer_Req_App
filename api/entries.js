@@ -106,14 +106,42 @@ module.exports = async function handler(req, res) {
   const db = getDB();
 
   if (req.method === 'GET') {
-    const { empCode, role } = req.query;
-    let sql = 'SELECT * FROM entries ORDER BY created_at DESC LIMIT 500';
-    let args = [];
-    // If employee (not manager), filter to their own submissions
-    if (empCode && role === 'employee') {
-      sql = 'SELECT * FROM entries WHERE submitted_by = ? OR employee_id = ? ORDER BY created_at DESC LIMIT 500';
-      args = [parseInt(empCode), String(empCode)];
+    const { empCode, role, dateFrom, dateTo, storeCode, limit } = req.query;
+    const pageLimit = Math.min(parseInt(limit) || 10, 500);
+    const PRIVILEGED = ['admin', 'owner', 'buyer'];
+    const privileged = PRIVILEGED.includes(role);
+
+    const conditions = [];
+    const args = [];
+
+    if (!privileged) {
+      // Non-privileged users: restrict to their store's submissions only
+      if (storeCode) {
+        conditions.push('store_code = ?');
+        args.push(String(storeCode));
+      } else if (empCode) {
+        // Fallback: their own submissions if no store code available
+        conditions.push('(submitted_by = ? OR employee_id = ?)');
+        args.push(parseInt(empCode), String(empCode));
+      }
+    } else {
+      // Privileged (admin/owner/buyer): optional store filter
+      if (storeCode) {
+        conditions.push('store_code = ?');
+        args.push(String(storeCode));
+      }
     }
+
+    // Date range filter — created_at stored as DD-MM-YYYY HH:MM:SS, convert to YYYY-MM-DD for comparison
+    const dateExpr = "substr(created_at,7,4)||'-'||substr(created_at,4,2)||'-'||substr(created_at,1,2)";
+    if (dateFrom) { conditions.push(dateExpr + ' >= ?'); args.push(String(dateFrom)); }
+    if (dateTo)   { conditions.push(dateExpr + ' <= ?'); args.push(String(dateTo)); }
+
+    let sql = 'SELECT * FROM entries';
+    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+    sql += ' ORDER BY created_at DESC LIMIT ?';
+    args.push(pageLimit);
+
     const result = await db.execute({ sql, args });
     return res.json(result.rows.map(mapRow));
   }

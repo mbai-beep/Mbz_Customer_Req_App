@@ -332,8 +332,30 @@ select option:disabled{color:#bbb}
 
   <!-- ── MY SUBMISSIONS VIEW ── -->
   <div id="myReqsView" class="page hidden">
-    <div style="padding:12px 12px 6px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:14px;font-weight:600;color:#555" id="reqsCount">Loading...</div>
+    <!-- Filter Panel -->
+    <div style="background:#fff;margin:10px 12px 0;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.07)">
+      <div style="font-size:12px;font-weight:700;color:#8DBBCC;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">&#x1F50D; Filter Submissions</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px">From Date</label>
+          <input type="date" id="filterDateFrom" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;outline:none;background:#F5EFE6;color:#333">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px">To Date</label>
+          <input type="date" id="filterDateTo" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;outline:none;background:#F5EFE6;color:#333">
+        </div>
+      </div>
+      <div id="storeFilterWrap" class="hidden" style="margin-bottom:8px">
+        <label style="display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px">Store</label>
+        <select id="filterStore" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;outline:none;background:#F5EFE6;appearance:none;-webkit-appearance:none;color:#333"><option value="">All Stores</option></select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-primary" onclick="loadMyReqs()" style="flex:1;padding:10px">&#x1F50D; Apply Filter</button>
+        <button class="btn btn-sm btn-secondary" onclick="clearFilters()" style="padding:10px 16px">&#x2715; Clear</button>
+      </div>
+    </div>
+    <div style="padding:10px 12px 4px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="font-size:14px;font-weight:600;color:#555;line-height:1.5" id="reqsCount">Loading...</div>
       <button class="btn-sm btn btn-secondary" onclick="loadMyReqs()">&#x21BB; Refresh</button>
     </div>
     <div id="reqsList"><div class="loading-text">&#x23F3; Loading submissions...</div></div>
@@ -347,7 +369,7 @@ select option:disabled{color:#bbb}
         <h4 style="margin:0 0 12px;color:#8DBBCC;font-size:0.9rem">New Employee Details</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div class="field"><label>Employee ID *</label><input type="number" id="addEmpCode" placeholder="e.g. 1001"></div>
-          <div class="field"><label>Role</label><select id="addEmpRole"><option value="employee">Employee</option><option value="manager">Manager</option></select></div>
+          <div class="field"><label>Role</label><select id="addEmpRole"><option value="employee">Employee</option><option value="manager">Manager</option><option value="buyer">Buyer</option><option value="owner">Owner</option></select></div>
         </div>
         <div class="field"><label>Full Name *</label><input type="text" id="addEmpName" placeholder="Full name"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -569,6 +591,21 @@ async function initApp() {
 
   if (currentUser.isFirstLogin) {
     document.getElementById('changePwdModal').classList.remove('hidden');
+  }
+
+  // Show store filter for admin / owner / buyer
+  if (isPrivileged()) {
+    const wrap = document.getElementById('storeFilterWrap');
+    if (wrap) wrap.classList.remove('hidden');
+    const fs = document.getElementById('filterStore');
+    if (fs && allStores.length) {
+      allStores.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.code;
+        o.textContent = s.name + ' (' + s.code + ')';
+        fs.appendChild(o);
+      });
+    }
   }
 }
 
@@ -1150,21 +1187,45 @@ async function handlePhotos(e) {
 }
 
 // ─── LOAD SUBMISSIONS ─────────────────────────────────
+const PRIVILEGED_ROLES = ['admin', 'owner', 'buyer'];
+function isPrivileged() { return PRIVILEGED_ROLES.includes(currentUser && currentUser.role); }
+
+function clearFilters() {
+  document.getElementById('filterDateFrom').value = '';
+  document.getElementById('filterDateTo').value = '';
+  const fs = document.getElementById('filterStore');
+  if (fs) fs.value = '';
+  loadMyReqs();
+}
+
 async function loadMyReqs() {
   document.getElementById('reqsList').innerHTML = '<div class="loading-text">&#x23F3; Loading...</div>';
   try {
-    const params = new URLSearchParams({ empCode: currentUser.empCode, role: currentUser.role });
+    const dateFrom = document.getElementById('filterDateFrom').value;
+    const dateTo   = document.getElementById('filterDateTo').value;
+    const fs = document.getElementById('filterStore');
+    const filterStoreVal = fs ? fs.value : '';
+    const hasFilter = dateFrom || dateTo || filterStoreVal;
+    const limit = hasFilter ? 500 : 10;
+
+    const params = new URLSearchParams({ empCode: currentUser.empCode, role: currentUser.role, limit });
+    // Non-privileged always restricted to their own store
+    if (!isPrivileged() && currentUser.storeCode) params.set('storeCode', currentUser.storeCode);
+    // Privileged: apply store filter only if selected
+    if (isPrivileged() && filterStoreVal) params.set('storeCode', filterStoreVal);
+    if (dateFrom) params.set('dateFrom', dateFrom);
+    if (dateTo)   params.set('dateTo', dateTo);
+
     const entries = await apiFetch('/api/entries?' + params, 'GET');
+    const hint = !hasFilter ? '<div style="font-size:11px;color:#aaa;margin-top:2px">Showing last 10 — use filters to see more</div>' : '';
     if (!Array.isArray(entries) || entries.length === 0) {
-      document.getElementById('reqsList').innerHTML = '<div class="loading-text">No submissions yet.</div>';
-      document.getElementById('reqsCount').textContent = '0 submissions';
+      document.getElementById('reqsList').innerHTML = '<div class="loading-text">No submissions found.</div>';
+      document.getElementById('reqsCount').innerHTML = '0 submissions' + hint;
       return;
     }
-    document.getElementById('reqsCount').textContent = `${entries.length} submission${entries.length !== 1 ? 's' : ''}`;
+    document.getElementById('reqsCount').innerHTML = `${entries.length} submission${entries.length !== 1 ? 's' : ''}` + hint;
     document.getElementById('reqsList').innerHTML = '';
-    entries.forEach(entry => {
-      document.getElementById('reqsList').appendChild(buildEntryCard(entry));
-    });
+    entries.forEach(entry => document.getElementById('reqsList').appendChild(buildEntryCard(entry)));
   } catch(e) {
     document.getElementById('reqsList').innerHTML = '<div class="loading-text" style="color:#c62828">Error loading. Please refresh.</div>';
   }
