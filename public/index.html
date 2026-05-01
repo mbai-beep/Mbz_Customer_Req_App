@@ -1240,11 +1240,14 @@ function buildEntryCard(entry) {
   const statusLabel = { 'Fulfilled':'Fulfilled ✓', 'Not_Fulfilled':'Not Fulfilled ✗', 'Pending':'Pending' }[entry.fulfillmentStatus] || 'Pending';
   const date = (() => {
     if (!entry.createdAt) return '';
-    let d = new Date(entry.createdAt);
-    if (isNaN(d)) {
-      const m = entry.createdAt.match(/^(\d{2})-(\d{2})-(\d{4})/);
-      if (m) d = new Date(m[3], parseInt(m[2])-1, parseInt(m[1]));
+    // created_at is always DD-MM-YYYY HH:MM:SS (IST) — parse regex first, never trust new Date() on this format
+    const m = entry.createdAt.match(/^(\d{2})-(\d{2})-(\d{4})/);
+    if (m) {
+      const d = new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+      return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
     }
+    // Fallback: ISO format (legacy entries)
+    const d = new Date(entry.createdAt);
     return isNaN(d) ? entry.createdAt : d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
   })();
 
