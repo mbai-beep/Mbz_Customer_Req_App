@@ -137,9 +137,13 @@ module.exports = async function handler(req, res) {
     if (dateFrom) { conditions.push(dateExpr + ' >= ?'); args.push(String(dateFrom)); }
     if (dateTo)   { conditions.push(dateExpr + ' <= ?'); args.push(String(dateTo)); }
 
+    // Order by true chronological time.
+    // created_at is stored as "DD-MM-YYYY HH:MM:SS" — string sort is wrong.
+    // synced_at is ISO (2026-05-01T...) and sorts correctly; fall back to created_at conversion.
+    const orderExpr = "COALESCE(synced_at, substr(created_at,7,4)||'-'||substr(created_at,4,2)||'-'||substr(created_at,1,2)||substr(created_at,11))";
     let sql = 'SELECT * FROM entries';
     if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
-    sql += ' ORDER BY created_at DESC LIMIT ?';
+    sql += ' ORDER BY ' + orderExpr + ' DESC LIMIT ?';
     args.push(pageLimit);
 
     const result = await db.execute({ sql, args });
