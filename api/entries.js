@@ -87,7 +87,7 @@ async function appendToSheet(entry) {
       req, entry.description, entry.employee, entry.employeeId, toIST(entry.createdAt),
       'Pending', entry.hasVoice ? 'Yes' : 'No', entry.voiceDuration,
       entry.photoCount, (entry.photoUrls||[]).join(', '), entry.audioUrl,
-      new Date().toISOString(), entry.submittedBy || '', entry.requirementType || 'New'
+      nowIST(), entry.submittedBy || '', entry.requirementType || 'New'
     ];
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
@@ -137,10 +137,9 @@ module.exports = async function handler(req, res) {
     if (dateFrom) { conditions.push(dateExpr + ' >= ?'); args.push(String(dateFrom)); }
     if (dateTo)   { conditions.push(dateExpr + ' <= ?'); args.push(String(dateTo)); }
 
-    // Order by true chronological time.
-    // created_at is stored as "DD-MM-YYYY HH:MM:SS" — string sort is wrong.
-    // synced_at is ISO (2026-05-01T...) and sorts correctly; fall back to created_at conversion.
-    const orderExpr = "COALESCE(synced_at, substr(created_at,7,4)||'-'||substr(created_at,4,2)||'-'||substr(created_at,1,2)||substr(created_at,11))";
+    // Both created_at and synced_at stored as "DD-MM-YYYY HH:MM:SS".
+    // Convert to YYYY-MM-DD HH:MM:SS for correct chronological string sort.
+    const orderExpr = "substr(created_at,7,4)||'-'||substr(created_at,4,2)||'-'||substr(created_at,1,2)||substr(created_at,11)";
     let sql = 'SELECT * FROM entries';
     if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
     sql += ' ORDER BY ' + orderExpr + ' DESC LIMIT ?';
@@ -165,7 +164,7 @@ module.exports = async function handler(req, res) {
         b.employee, b.employeeId || '', nowIST(),
         b.status || 'new', b.hasVoice ? 1 : 0,
         b.voiceDuration || '', b.photoCount || 0,
-        photoUrlsJson, b.audioUrl || '', new Date().toISOString(),
+        photoUrlsJson, b.audioUrl || '', nowIST(),
         b.fulfillmentStatus || 'Pending', b.submittedBy || 0,
         b.requirementType || 'New'
       ]
