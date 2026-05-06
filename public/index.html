@@ -1185,7 +1185,7 @@ async function handlePhotos(e) {
       const b64 = await new Promise((res,rej) => {
         const fr = new FileReader(); fr.onload = ev => res(ev.target.result); fr.onerror = rej; fr.readAsDataURL(compressed);
       });
-      const d = await uploadWithRetry(l{ fileData: b64, fileName: 'photo_'+Date.now()+'.jpg', mimeType: 'image/jpeg' });
+      const d = await uploadWithRetry({ fileData: b64, fileName: 'photo_'+Date.now()+'.jpg', mimeType: 'image/jpeg' });
       if (d && d.url) {
         photoUrls.push(d.url);
         const img = document.createElement('img');
