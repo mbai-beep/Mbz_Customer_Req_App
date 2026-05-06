@@ -588,8 +588,8 @@ async function initApp() {
   show('appSection');
   document.getElementById('userBadge').textContent = `${currentUser.empName}\n${currentUser.designation||''}`;
   document.getElementById('headerSubtitle').textContent = currentUser.storeName || 'Field Employee App';
-  if (currentUser.role === 'manager') document.getElementById('submissionsLabel').textContent = 'All Submissions';
-  if (currentUser.role === 'admin') {
+  if (['admin','owner','manager','buyer','merchandiser'].includes(currentUser.role)) document.getElementById('submissionsLabel').textContent = 'All Submissions';
+  if (['admin','owner','manager'].includes(currentUser.role)) {
     document.getElementById('tabAdmin').classList.remove('hidden');
   }
   showView('newReq');
@@ -1200,7 +1200,7 @@ async function handlePhotos(e) {
 }
 
 // ─── LOAD SUBMISSIONS ─────────────────────────────────
-const PRIVILEGED_ROLES = ['admin', 'owner', 'buyer'];
+const PRIVILEGED_ROLES = ['admin', 'owner', 'manager', 'buyer', 'merchandiser'];
 function isPrivileged() { return PRIVILEGED_ROLES.includes(currentUser && currentUser.role); }
 
 function clearFilters() {
