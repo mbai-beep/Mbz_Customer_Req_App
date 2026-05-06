@@ -1205,7 +1205,7 @@ function isPrivileged() { return PRIVILEGED_ROLES.includes(currentUser && curren
 
 function clearFilters() {
   document.getElementById('filterDateFrom').value = '';
-  document.getElementByH('filterDateTo').value = '';
+  document.getElementById('filterDateTo').value = '';
   const fs = document.getElementById('filterStore');
   if (fs) fs.value = '';
   loadMyReqs();
