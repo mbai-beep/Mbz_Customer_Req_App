@@ -28,7 +28,8 @@ function mapRow(r) {
     syncedAt: r.synced_at,
     fulfillmentStatus: r.fulfillment_status || 'Pending',
     submittedBy: r.submitted_by || 0,
-    requirementType: r.requirement_type || 'New'
+    requirementType: r.requirement_type || 'New',
+                           challanNumber: r.challan_number || ''
   };
 }
 
