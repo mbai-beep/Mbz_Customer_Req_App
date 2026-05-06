@@ -109,7 +109,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     const { empCode, role, dateFrom, dateTo, storeCode, limit } = req.query;
     const pageLimit = Math.min(parseInt(limit) || 10, 500);
-    const PRIVILEGED = ['admin', 'owner', 'buyer'];
+    const PRIVILEGED = ['admin', 'owner', 'manager', 'buyer', 'merchandiser'];
     const privileged = PRIVILEGED.includes(role);
 
     const conditions = [];
