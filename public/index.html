@@ -89,6 +89,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#EAF4F8;min-height:100vh
 .photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .photo-thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;border:2px solid #ddd}
 .photo-add{width:72px;height:72px;border-radius:8px;border:2px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;background:#fafafa;color:#999}
+/* ── LIGHTBOX ── */
+#lb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out}
+#lb-overlay.lb-open{display:flex}
+#lb-overlay img{max-width:94vw;max-height:88vh;object-fit:contain;border-radius:6px;box-shadow:0 4px 40px rgba(0,0,0,.6);cursor:default}
+#lb-close{position:fixed;top:14px;right:16px;font-size:26px;color:#fff;cursor:pointer;z-index:10000;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border-radius:50%;line-height:1}
 /* ── ENTRY CARDS ── */
 .entry-card{background:#fff;border-radius:14px;margin:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
 .entry-header{padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
@@ -1284,7 +1289,7 @@ function buildEntryCard(entry) {
     <div class="entry-body">
       ${reqSummary ? `<div class="req-summary">${reqSummary}</div>` : ''}
       ${entry.audioUrl ? `<div style="margin-top:8px"><audio controls src="${esc(driveAudioUrl(entry.audioUrl))}" style="width:100%;height:36px"></audio></div>` : ''}
-      ${entry.photoUrls && entry.photoUrls.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${entry.photoUrls.map(u=>`<img src="${esc(driveImgUrl(u))}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd">`).join('')}</div>` : ''}
+      ${entry.photoUrls && entry.photoUrls.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${entry.photoUrls.map(u=>`<img src="${esc(driveImgUrl(u))}" onclick="openLightbox('${esc(driveImgUrl(u))}')" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd;cursor:pointer">`).join('')}</div>` : ''}
       ${entry.challanNumber ? `<div style="margin-top:6px;font-size:12px;color:#555">&#x1F4CB; Challan/Ref: <strong>${esc(entry.challanNumber)}</strong></div>` : ''}
       <div class="status-actions">
         <button class="btn btn-sm ${entry.fulfillmentStatus==='Fulfilled'?'btn-gray':'btn-primary'}" onclick="markFulfilled('${esc(entry.id)}')">&#x2714; Fulfilled</button>
@@ -1370,6 +1375,23 @@ function togglePw(inputId, btn) {
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ── LIGHTBOX ─────────────────────────────────────────────
+function openLightbox(url) {
+  var fullUrl = url.replace(/sz=w\d+/, 'sz=w1600');
+  document.getElementById('lb-img').src = fullUrl;
+  document.getElementById('lb-overlay').classList.add('lb-open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+  if (e && e.target && e.target.id === 'lb-img') return;
+  document.getElementById('lb-overlay').classList.remove('lb-open');
+  document.getElementById('lb-img').src = '';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
 </script>
 
 <style>
@@ -1436,5 +1458,11 @@ body { background: #EAF4F8 !important; }
 /* Login card accent */
 .login-card { border-top: 3px solid #8DBBCC !important; }
 </style>
+
+<!-- ── LIGHTBOX OVERLAY ── -->
+<div id="lb-overlay" onclick="closeLightbox(event)">
+  <div id="lb-close" onclick="closeLightbox()">&#x2715;</div>
+  <img id="lb-img" src="" alt="Photo">
+</div>
 </body>
 </html>
