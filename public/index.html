@@ -320,7 +320,7 @@ select option:disabled{color:#bbb}
       <div class="photo-grid" id="photoGrid">
         <div class="photo-add" onclick="document.getElementById('photoInput').click()">&#x2B;</div>
       </div>
-      <input type="file" id="photoInput" accept="image/*" multiple class="hidden" onchange="handlePhotos(event)">
+      <input type="file" id="photoInput" multiple class="hidden" onchange="handlePhotos(event)">
       <div id="photoUploadStatus" style="font-size:12px;color:#777;margin-top:6px"></div>
     </div>
 
@@ -1174,8 +1174,9 @@ async function uploadWithRetry(payload, retries=3) {
   }
 }
 async function handlePhotos(e) {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
+  const allFiles = Array.from(e.target.files);
+  const files = allFiles.filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|heic|heif|bmp)$/i.test(f.name));
+  if (!files.length) { if (allFiles.length) showToast('Please select image files only', 'error'); e.target.value = ''; return; }
   const statusEl = document.getElementById('photoUploadStatus');
   let uploaded = 0;
   for (let fi=0; fi<files.length; fi++) {
