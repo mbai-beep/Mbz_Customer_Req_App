@@ -174,6 +174,16 @@ module.exports = async (req, res) => {
     try {
       const token = authHeader.replace('Bearer ', '');
       const decoded = jwt.verify(token, JWT_SECRET);
+      // Refresh isFirstLogin from DB to avoid stale token state after password change
+      try {
+        const authRow = await db.execute({
+          sql: 'SELECT is_first_login FROM employee_auth WHERE emp_code = ?',
+          args: [parseInt(decoded.empCode)]
+        });
+        if (authRow.rows.length) {
+          decoded.isFirstLogin = Number(authRow.rows[0].is_first_login) === 1;
+        }
+      } catch(dbErr) { /* non-fatal, use token value */ }
       return res.json({ valid: true, user: decoded });
     } catch {
       return res.json({ valid: false });
