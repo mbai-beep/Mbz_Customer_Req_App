@@ -8,7 +8,11 @@ const CORS = {
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
-const PRIVILEGED = ['admin', 'owner', 'buyer', 'manager'];
+const PRIVILEGED = ['admin', 'owner', 'buyer', 'manager', 'merchandiser'];
+
+// Fixed sheet column indices (0-based, A=0)
+const FULFILLMENT_COL = 10; // Column K
+const CHALLAN_COL     = 19; // Column T
 
 function toColLetter(idx) {
   let s = '';
@@ -16,6 +20,15 @@ function toColLetter(idx) {
     s = String.fromCharCode(65 + (n - 1) % 26) + s;
   return s;
 }
+
+function toIST(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
+  const p = n => String(n).padStart(2, '0');
+  return p(ist.getUTCDate()) + '-' + p(ist.getUTCMonth()+1) + '-' + ist.getUTCFullYear() + ' ' + p(ist.getUTCHours()) + ':' + p(ist.getUTCMinutes()) + ':' + p(ist.getUTCSeconds());
+}
+function nowIST() { return toIST(new Date().toISOString()); }
 
 async function getSheetsClient() {
   const saRaw = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
@@ -29,45 +42,76 @@ async function getSheetsClient() {
   } catch(e) { return null; }
 }
 
-async function updateSheetRow(entryId, fulfillmentStatus, challanNumber) {
+function buildSheetRow(entry, fulfillmentStatus, challanNumber) {
+  const req = (() => {
+    try {
+      if (typeof entry.requirement === 'string' && entry.requirement.startsWith('{')) {
+        const p = JSON.parse(entry.requirement);
+        return Object.entries(p).map(([k,v]) => k + ': ' + (Array.isArray(v)?v.join(', '):v)).join(' | ');
+      }
+    } catch(e) {}
+    return entry.requirement || '';
+  })();
+  let photoUrls = [];
+  try { photoUrls = JSON.parse(entry.photo_urls || '[]'); } catch(e) {}
+  return [
+    entry.id,                                        // A (0)
+    entry.customer_name,                             // B (1)
+    entry.mobile_number,                             // C (2)
+    entry.store_name,                                // D (3)
+    entry.store_code || '',                          // E (4)
+    req,                                             // F (5)
+    entry.description || '',                         // G (6)
+    entry.employee,                                  // H (7)
+    entry.employee_id || '',                         // I (8)
+    toIST(entry.created_at),                         // J (9)
+    fulfillmentStatus,                               // K (10) fulfillment_status
+    entry.has_voice ? 'Yes' : 'No',                 // L (11)
+    entry.voice_duration || '',                      // M (12)
+    entry.photo_count || 0,                          // N (13)
+    photoUrls.join(', '),                            // O (14)
+    entry.audio_url || '',                           // P (15)
+    nowIST(),                                        // Q (16) synced_at
+    entry.submitted_by || '',                        // R (17)
+    entry.requirement_type || 'New',                 // S (18)
+    challanNumber || entry.challan_number || ''      // T (19) challan_number
+  ];
+}
+
+async function updateSheetRow(entryId, fulfillmentStatus, challanNumber, entryData) {
   const sheets = await getSheetsClient();
   if (!sheets) return;
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
   try {
-    const [headerResp, idResp] = await Promise.all([
-      sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!1:1' }),
-      sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!A:A' })
-    ]);
-    const headers = (headerResp.data.values && headerResp.data.values[0]) || [];
-    const ids = (idResp.data.values || []).map(r => r[0] || '');
-    const rowIndex = ids.indexOf(entryId);
-    if (rowIndex <= 0) return;
-    let fsCol = headers.indexOf('fulfillment_status');
-    if (fsCol === -1) fsCol = 10;
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: `Sheet1!${toColLetter(fsCol)}${rowIndex + 1}`,
-      valueInputOption: 'RAW',
-      requestBody: { values: [[fulfillmentStatus]] }
-    });
-    if (challanNumber) {
-      let cnCol = headers.indexOf('challan_number');
-      if (cnCol === -1) {
-        cnCol = headers.length;
-        await sheets.spreadsheets.values.update({
-          spreadsheetId,
-          range: `Sheet1!${toColLetter(cnCol)}1`,
-          valueInputOption: 'RAW',
-          requestBody: { values: [['challan_number']] }
-        });
-      }
-      await sheets.spreadsheets.values.update({
+    const idResp = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!A:A' });
+    const ids = (idResp.data.values || []).map(r => (r[0] || '').trim());
+    const rowIndex = ids.indexOf(String(entryId).trim());
+
+    if (rowIndex < 0) {
+      // Entry not in sheet — append full row as fallback
+      if (!entryData) return;
+      const row = buildSheetRow(entryData, fulfillmentStatus, challanNumber);
+      await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: `Sheet1!${toColLetter(cnCol)}${rowIndex + 1}`,
+        range: 'Sheet1!A:T',
         valueInputOption: 'RAW',
-        requestBody: { values: [[challanNumber]] }
+        requestBody: { values: [row] }
       });
+      return;
     }
+
+    const sheetRow = rowIndex + 1;
+    // Batch-update fulfillment_status (K) and challan_number (T) atomically
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        valueInputOption: 'RAW',
+        data: [
+          { range: 'Sheet1!' + toColLetter(FULFILLMENT_COL) + sheetRow, values: [[fulfillmentStatus]] },
+          { range: 'Sheet1!' + toColLetter(CHALLAN_COL)     + sheetRow, values: [[challanNumber || '']] }
+        ]
+      }
+    });
   } catch(e) { console.error('Sheet update-status error:', e.message); }
 }
 
@@ -116,7 +160,8 @@ module.exports = async (req, res) => {
       });
     }
 
-    updateSheetRow(id, fulfillmentStatus, challanNumber).catch(() => {});
+    // Async sheet update — pass entry data so we can append if not found in sheet
+    updateSheetRow(id, fulfillmentStatus, challanNumber || '', entry).catch(() => {});
     return res.json({ success: true });
   }
 
