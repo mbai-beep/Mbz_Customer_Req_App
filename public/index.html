@@ -1335,6 +1335,9 @@ async function updateStatus(id, status, challanNumber) {
     const r = await apiFetch('/api/update-status', 'POST', body);
     if (!r.success) return showToast(r.error || 'Update failed', 'error');
     showToast(`Marked as ${status.replace('_',' ')}`, 'success');
+    if (r.sheetSynced === false) {
+      setTimeout(() => showToast('⚠️ Sheet not updated: ' + (r.sheetError || 'unknown error'), 'error'), 2000);
+    }
     loadMyReqs(); // Reload to refresh
   } catch {
     showToast('Network error', 'error');
