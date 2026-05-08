@@ -10,9 +10,14 @@ const CORS = {
 };
 const PRIVILEGED = ['admin', 'owner', 'buyer', 'manager', 'merchandiser'];
 
-// Fixed sheet column indices (0-based, A=0)
-const FULFILLMENT_COL = 10; // Column K
-const CHALLAN_COL     = 19; // Column T
+// 0-based column indices matching entries.js appendToSheet row order:
+// A=id, B=customerName, C=mobile, D=storeName, E=storeCode, F=requirement,
+// G=description, H=employee, I=employeeId, J=createdAt,
+// K(10)=fulfillment_status, L=hasVoice, M=voiceDuration, N=photoCount,
+// O=photoUrls, P=audioUrl, Q=synced_at, R=submittedBy, S=requirementType,
+// T(19)=challan_number
+const COL_FULFILLMENT = 10; // K
+const COL_CHALLAN     = 19; // T
 
 function toColLetter(idx) {
   let s = '';
@@ -21,15 +26,6 @@ function toColLetter(idx) {
   return s;
 }
 
-function toIST(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  const ist = new Date(d.getTime() + 5.5 * 60 * 60 * 1000);
-  const p = n => String(n).padStart(2, '0');
-  return p(ist.getUTCDate()) + '-' + p(ist.getUTCMonth()+1) + '-' + ist.getUTCFullYear() + ' ' + p(ist.getUTCHours()) + ':' + p(ist.getUTCMinutes()) + ':' + p(ist.getUTCSeconds());
-}
-function nowIST() { return toIST(new Date().toISOString()); }
-
 async function getSheetsClient() {
   const saRaw = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || process.env.GOOGLE_SERVICE_ACCOUNT;
   if (!saRaw || !process.env.GOOGLE_SHEET_ID) return null;
@@ -37,82 +33,91 @@ async function getSheetsClient() {
     let sa;
     try { sa = JSON.parse(Buffer.from(saRaw, 'base64').toString('utf8')); } catch(e) {}
     if (!sa) try { sa = JSON.parse(saRaw); } catch(e) {}
-    const auth = new google.auth.GoogleAuth({ credentials: sa, scopes: ['https://www.googleapis.com/auth/spreadsheets'] });
+    if (!sa) throw new Error('Could not parse service account credentials');
+    const auth = new google.auth.GoogleAuth({
+      credentials: sa,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
+    });
     return google.sheets({ version: 'v4', auth });
-  } catch(e) { return null; }
+  } catch(e) {
+    console.error('Sheets auth error:', e.message);
+    return null;
+  }
 }
 
-function buildSheetRow(entry, fulfillmentStatus, challanNumber) {
-  const req = (() => {
-    try {
-      if (typeof entry.requirement === 'string' && entry.requirement.startsWith('{')) {
-        const p = JSON.parse(entry.requirement);
-        return Object.entries(p).map(([k,v]) => k + ': ' + (Array.isArray(v)?v.join(', '):v)).join(' | ');
-      }
-    } catch(e) {}
-    return entry.requirement || '';
-  })();
-  let photoUrls = [];
-  try { photoUrls = JSON.parse(entry.photo_urls || '[]'); } catch(e) {}
-  return [
-    entry.id,                                        // A (0)
-    entry.customer_name,                             // B (1)
-    entry.mobile_number,                             // C (2)
-    entry.store_name,                                // D (3)
-    entry.store_code || '',                          // E (4)
-    req,                                             // F (5)
-    entry.description || '',                         // G (6)
-    entry.employee,                                  // H (7)
-    entry.employee_id || '',                         // I (8)
-    toIST(entry.created_at),                         // J (9)
-    fulfillmentStatus,                               // K (10) fulfillment_status
-    entry.has_voice ? 'Yes' : 'No',                 // L (11)
-    entry.voice_duration || '',                      // M (12)
-    entry.photo_count || 0,                          // N (13)
-    photoUrls.join(', '),                            // O (14)
-    entry.audio_url || '',                           // P (15)
-    nowIST(),                                        // Q (16) synced_at
-    entry.submitted_by || '',                        // R (17)
-    entry.requirement_type || 'New',                 // S (18)
-    challanNumber || entry.challan_number || ''      // T (19) challan_number
-  ];
-}
-
-async function updateSheetRow(entryId, fulfillmentStatus, challanNumber, entryData) {
-  const sheets = await getSheetsClient();
-  if (!sheets) return;
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+// Fetch the actual first sheet tab name — avoids hardcoding "Sheet1"
+async function getFirstSheetName(sheets, spreadsheetId) {
   try {
-    const idResp = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!A:A' });
-    const ids = (idResp.data.values || []).map(r => (r[0] || '').trim());
-    const rowIndex = ids.indexOf(String(entryId).trim());
+    const meta = await sheets.spreadsheets.get({
+      spreadsheetId,
+      fields: 'sheets.properties.title'
+    });
+    const list = (meta.data.sheets || []);
+    if (list.length) return list[0].properties.title;
+  } catch(e) {
+    console.error('getFirstSheetName error:', e.message);
+  }
+  return 'Sheet1';
+}
+
+// Returns { ok: boolean, error: string|null }
+async function updateSheetRow(entryId, fulfillmentStatus, challanNumber) {
+  if (!process.env.GOOGLE_SERVICE_ACCOUNT_B64 && !process.env.GOOGLE_SERVICE_ACCOUNT) {
+    return { ok: false, error: 'Sheets not configured: missing credentials env var' };
+  }
+  if (!process.env.GOOGLE_SHEET_ID) {
+    return { ok: false, error: 'Sheets not configured: missing GOOGLE_SHEET_ID env var' };
+  }
+
+  const sheets = await getSheetsClient();
+  if (!sheets) return { ok: false, error: 'Failed to initialise Google Sheets client (check credentials)' };
+
+  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+
+  try {
+    const sheetName = await getFirstSheetName(sheets, spreadsheetId);
+
+    // Fetch all IDs in column A
+    const idResp = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!A:A`
+    });
+
+    const ids = (idResp.data.values || []).map(r => (r[0] || '').toString().trim());
+    const rowIndex = ids.indexOf(String(entryId).trim()); // 0-based
 
     if (rowIndex < 0) {
-      // Entry not in sheet — append full row as fallback
-      if (!entryData) return;
-      const row = buildSheetRow(entryData, fulfillmentStatus, challanNumber);
-      await sheets.spreadsheets.values.append({
-        spreadsheetId,
-        range: 'Sheet1!A:T',
-        valueInputOption: 'RAW',
-        requestBody: { values: [row] }
-      });
-      return;
+      return {
+        ok: false,
+        error: `Entry ID "${entryId}" not found in sheet "${sheetName}" (${ids.length} rows scanned)`
+      };
     }
 
-    const sheetRow = rowIndex + 1;
-    // Batch-update fulfillment_status (K) and challan_number (T) atomically
+    const sheetRow = rowIndex + 1; // 1-based for Sheets API
+
     await sheets.spreadsheets.values.batchUpdate({
       spreadsheetId,
       requestBody: {
         valueInputOption: 'RAW',
         data: [
-          { range: 'Sheet1!' + toColLetter(FULFILLMENT_COL) + sheetRow, values: [[fulfillmentStatus]] },
-          { range: 'Sheet1!' + toColLetter(CHALLAN_COL)     + sheetRow, values: [[challanNumber || '']] }
+          {
+            range: `${sheetName}!${toColLetter(COL_FULFILLMENT)}${sheetRow}`,
+            values: [[fulfillmentStatus]]
+          },
+          {
+            range: `${sheetName}!${toColLetter(COL_CHALLAN)}${sheetRow}`,
+            values: [[challanNumber || '']]
+          }
         ]
       }
     });
-  } catch(e) { console.error('Sheet update-status error:', e.message); }
+
+    return { ok: true, error: null };
+  } catch(e) {
+    const msg = (e.message || 'Unknown Sheets error');
+    console.error('Sheet update-status error:', msg);
+    return { ok: false, error: msg };
+  }
 }
 
 module.exports = async (req, res) => {
@@ -144,7 +149,8 @@ module.exports = async (req, res) => {
     if (!entryResult.rows.length) return res.json({ success: false, error: 'Entry not found' });
 
     const entry = entryResult.rows[0];
-    const isOwner = String(entry.employee_id) === String(user.empCode) || Number(entry.submitted_by) === Number(user.empCode);
+    const isOwner = String(entry.employee_id) === String(user.empCode) ||
+                    Number(entry.submitted_by) === Number(user.empCode);
     const isPrivileged = PRIVILEGED.includes(user.role);
     if (!isOwner && !isPrivileged) return res.json({ success: false, error: 'Permission denied' });
 
@@ -160,9 +166,14 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Async sheet update — pass entry data so we can append if not found in sheet
-    updateSheetRow(id, fulfillmentStatus, challanNumber || '', entry).catch(() => {});
-    return res.json({ success: true });
+    // Await sheet sync so we can report its result
+    const sheetResult = await updateSheetRow(id, fulfillmentStatus, challanNumber || '');
+
+    return res.json({
+      success: true,
+      sheetSynced: sheetResult.ok,
+      sheetError: sheetResult.error || null
+    });
   }
 
   return res.status(400).json({ error: 'Invalid request method' });
