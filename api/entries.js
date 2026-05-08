@@ -88,11 +88,11 @@ async function appendToSheet(entry) {
       req, entry.description, entry.employee, entry.employeeId, toIST(entry.createdAt),
       'Pending', entry.hasVoice ? 'Yes' : 'No', entry.voiceDuration,
       entry.photoCount, (entry.photoUrls||[]).join(', '), entry.audioUrl,
-      nowIST(), entry.submittedBy || '', entry.requirementType || 'New'
+      nowIST(), entry.submittedBy || '', entry.requirementType || 'New', ''
     ];
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Sheet1!A:R',
+      range: 'Sheet1!A:T',
       valueInputOption: 'RAW',
       requestBody: { values: [row] }
     });
