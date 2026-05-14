@@ -883,8 +883,9 @@ function renderEmployeeResult(e) {
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
     '<button class="btn btn-secondary btn-sm" data-code="' + e.emp_code + '" data-name="' + safeName + '" onclick="adminResetPwd(this.dataset.code, this.dataset.name)">&#x1F511; Reset Password</button>' +
-    '<button class="btn btn-sm" data-code="' + e.emp_code + '" data-status="' + e.store_status + '" onclick="adminToggleStatus(this.dataset.code, this.dataset.status)" style="background:' + (isActive ? '#fff3e0' : '#E3F2F8') + ';color:' + (isActive ? '#e65100' : '#8DBBCC') + ';border:1px solid ' + (isActive ? '#ffcc80' : '#8DBBCC') + '">' + (isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate') + '</button>' +
-    '</div></div>';
+    '<button class="btn btn-sm" data-code="' + e.emp_code + '" data-status="' + e.store_status + '" onclick="adminToggleStatus(this.dataset.code, this.dataset.status)" style="background:' + (isActive ? '#fff3e0' : '#E3F2F8') + ';color:' + (isActive ? '#e65100' : '#8DBBCC') + ';border:1px solid ' + (isActive ? '#ffcc80' : '#8DBBCC') + '">' + (isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate') + '</button>';
+  if (!Number(e.has_auth)) { html += '<button class="btn btn-sm" data-code="' + e.emp_code + '" onclick="adminSetupAuth(this.dataset.code)" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80">&#x26A0;&#xFE0F; Setup Auth</button>'; }
+  html += '</div></div>';
 }
 
 async function adminToggleStatus(empCode, currentStatus) {
@@ -913,7 +914,20 @@ async function adminResetPwd(empCode, empName) {
 function showAddEmpForm() {
   document.getElementById('addEmpForm').classList.remove('hidden');
   document.getElementById('addEmpToggleBtn').classList.add('hidden');
-  ['addEmpCode','addEmpName','addEmpDesignation','addEmpMobile','addEmpStoreName','addEmpStoreCode','addEmpPwd'].forEach(id => { document.getElementById(id).value = ''; });
+  ['addEmpCode','addEmpName','addEmpDesignation','addEmpMobile','addEmpStoreName','addEmpStorasync function adminSetupAuth(empCode) {
+  if (!confirm('Setup login for #' + empCode + '? Default password: MB@' + empCode)) return;
+  try {
+    const tok = getAuthToken();
+    const r = await fetch('/api/admin?action=setup-auth', { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      body: JSON.stringify({ empCode: parseInt(empCode) }) });
+    const d = await r.json();
+    if (d.success) { showToast('Auth set up. Default password: ' + d.defaultPassword, 'success'); loadAdminEmployees(); }
+    else showToast(d.error || 'Failed to setup auth', 'error');
+  } catch(err) { showToast('Network error', 'error'); }
+}
+
+eCode','addEmpPwd'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('addEmpRole').value = 'employee';
 }
 function hideAddEmpForm() {
