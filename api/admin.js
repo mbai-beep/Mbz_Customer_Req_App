@@ -31,30 +31,32 @@ module.exports = async (req, res) => {
   const db = getDB();
   const { action } = req.query;
 
-  // ── GET single employee by ID ───────────────────────
+  // ── GET single employee by ID ───────────────────────────────────
   if (action === 'get-employee') {
     const { empCode } = req.query;
     if (!empCode) return res.json({ success: false, error: 'empCode required' });
     const result = await db.execute({
       sql: `SELECT e.emp_code, e.emp_name, e.emp_designation, e.emp_mobile,
-             e.store_name, e.store_code, e.store_status, e.role,
-             COALESCE(a.tc_accepted, 0) AS tc_accepted
-      FROM employees e
-      LEFT JOIN employee_auth a ON e.emp_code = a.emp_code
-      WHERE e.emp_code = ?`,
+              e.store_name, e.store_code, e.store_status, e.role,
+              COALESCE(a.tc_accepted, 0) AS tc_accepted,
+              CASE WHEN a.emp_code IS NOT NULL THEN 1 ELSE 0 END AS has_auth
+            FROM employees e
+            LEFT JOIN employee_auth a ON e.emp_code = a.emp_code
+            WHERE e.emp_code = ?`,
       args: [parseInt(empCode)]
     });
     if (!result.rows.length) return res.json({ success: false, error: 'Employee ID not found' });
     return res.json({ success: true, employee: result.rows[0] });
   }
 
-  // ── GET list of all employees ─────────────────────────────
+  // ── GET list of all employees ────────────────────────────────────────
   if (action === 'list-employees') {
     const result = await db.execute(`
       SELECT e.emp_code, e.emp_name, e.emp_designation, e.emp_mobile,
              e.store_name, e.store_code, e.store_status, e.role,
              COALESCE(a.is_first_login, 1) AS is_first_login,
-             a.password_changed_at, COALESCE(a.tc_accepted, 0) AS tc_accepted
+             a.password_changed_at, COALESCE(a.tc_accepted, 0) AS tc_accepted,
+             CASE WHEN a.emp_code IS NOT NULL THEN 1 ELSE 0 END AS has_auth
       FROM employees e
       LEFT JOIN employee_auth a ON e.emp_code = a.emp_code
       ORDER BY e.store_name ASC, e.emp_name ASC
@@ -62,7 +64,7 @@ module.exports = async (req, res) => {
     return res.json({ success: true, employees: result.rows });
   }
 
-  // ── POST add new employee ─────────────────────────────────
+  // ── POST add new employee ───────────────────────────────────────────
   if (action === 'add-employee' && req.method === 'POST') {
     const { empCode, empName, empDesignation, empMobile, storeCode, storeName, role, initialPassword } = req.body || {};
     if (!empCode || !empName || !initialPassword) return res.json({ success: false, error: 'Employee ID, name and password are required' });
@@ -81,7 +83,33 @@ module.exports = async (req, res) => {
     return res.json({ success: true });
   }
 
-  // ── POST toggle employee status ───────────────────────────
+  // ── POST setup auth for existing employee (no auth record yet) ───
+  if (action === 'setup-auth' && req.method === 'POST') {
+    const { empCode } = req.body || {};
+    if (!empCode) return res.json({ success: false, error: 'empCode required' });
+    // Check employee exists in employees table
+    const empResult = await db.execute({
+      sql: 'SELECT emp_code, emp_name FROM employees WHERE emp_code = ?',
+      args: [parseInt(empCode)]
+    });
+    if (!empResult.rows.length) return res.json({ success: false, error: 'Employee ID not found' });
+    // Check if auth already exists
+    const authCheck = await db.execute({
+      sql: 'SELECT emp_code FROM employee_auth WHERE emp_code = ?',
+      args: [parseInt(empCode)]
+    });
+    if (authCheck.rows.length) return res.json({ success: false, error: 'Auth already set up. Use Reset Password to change their password.' });
+    // Create default password: MB@{empCode}
+    const defaultPwd = 'MB@' + empCode;
+    const hash = await bcrypt.hash(defaultPwd, 10);
+    await db.execute({
+      sql: `INSERT INTO employee_auth (emp_code, password_hash, is_first_login, tc_accepted, password_history) VALUES (?, ?, 1, 0, '[]')`,
+      args: [parseInt(empCode), hash]
+    });
+    return res.json({ success: true, defaultPassword: defaultPwd });
+  }
+
+  // ── POST toggle employee status ──────────────────────────────────────────
   if (action === 'toggle-status' && req.method === 'POST') {
     const { empCode, status } = req.body || {};
     if (!empCode || !status) return res.json({ success: false, error: 'empCode and status required' });
@@ -92,7 +120,7 @@ module.exports = async (req, res) => {
     return res.json({ success: true });
   }
 
-  // ── POST admin reset password ─────────────────────────────
+  // ── POST admin reset password ─────────────────────────────────────────
   if (action === 'reset-password' && req.method === 'POST') {
     const { empCode, newPassword } = req.body || {};
     if (!empCode || !newPassword) return res.json({ success: false, error: 'empCode and newPassword required' });
