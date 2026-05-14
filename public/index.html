@@ -914,7 +914,8 @@ async function adminResetPwd(empCode, empName) {
 function showAddEmpForm() {
   document.getElementById('addEmpForm').classList.remove('hidden');
   document.getElementById('addEmpToggleBtn').classList.add('hidden');
-  ['addEmpCode','addEmpName','addEmpDesignation','addEmpMobile','addEmpStoreName','addEmpStorasync function adminSetupAuth(empCode) {
+  ['addEmpCode','addEmpName','addEmpDesignation','addEmpMobile','addEmpStoreName','addEmpStoreCode','addEmpPwd'].forEach(id => { document.getElementById(id).value = ''; });
+async function adminSetupAuth(empCode) {
   if (!confirm('Setup login for #' + empCode + '? Default password: MB@' + empCode)) return;
   try {
     const tok = getAuthToken();
