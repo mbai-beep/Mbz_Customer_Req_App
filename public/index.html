@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>MB Customer Requirement</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sacramento&displayh=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#EAF4F8;min-height:100vh;display:flex;flex-direction:column;align-items:center}
@@ -870,7 +870,7 @@ function renderEmployeeResult(e) {
   const result = document.getElementById('searchResult');
   const isActive = e.store_status === 'Active';
   const safeName = (e.emp_name || '').replace(/"/g, '&quot;');
-  result.innerHTML =
+  let html =
     '<div style="background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.1)">' +
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">' +
     '<div>' +
@@ -886,6 +886,7 @@ function renderEmployeeResult(e) {
     '<button class="btn btn-sm" data-code="' + e.emp_code + '" data-status="' + e.store_status + '" onclick="adminToggleStatus(this.dataset.code, this.dataset.status)" style="background:' + (isActive ? '#fff3e0' : '#E3F2F8') + ';color:' + (isActive ? '#e65100' : '#8DBBCC') + ';border:1px solid ' + (isActive ? '#ffcc80' : '#8DBBCC') + '">' + (isActive ? '&#x1F534; Deactivate' : '&#x1F7E2; Activate') + '</button>';
   if (!Number(e.has_auth)) { html += '<button class="btn btn-sm" data-code="' + e.emp_code + '" onclick="adminSetupAuth(this.dataset.code)" style="background:#fff3e0;color:#e65100;border:1px solid #ffcc80">&#x26A0;&#xFE0F; Setup Auth</button>'; }
   html += '</div></div>';
+  result.innerHTML = html;
 }
 
 async function adminToggleStatus(empCode, currentStatus) {
@@ -911,10 +912,6 @@ async function adminResetPwd(empCode, empName) {
   } catch(e) { showToast('Network error', 'error'); }
 }
 
-function showAddEmpForm() {
-  document.getElementById('addEmpForm').classList.remove('hidden');
-  document.getElementById('addEmpToggleBtn').classList.add('hidden');
-  ['addEmpCode','addEmpName','addEmpDesignation','addEmpMobile','addEmpStoreName','addEmpStoreCode','addEmpPwd'].forEach(id => { document.getElementById(id).value = ''; });
 async function adminSetupAuth(empCode) {
   if (!confirm('Setup login for #' + empCode + '? Default password: MB@' + empCode)) return;
   try {
@@ -923,11 +920,15 @@ async function adminSetupAuth(empCode) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
       body: JSON.stringify({ empCode: parseInt(empCode) }) });
     const d = await r.json();
-    if (d.success) { showToast('Auth set up. Default password: ' + d.defaultPassword, 'success'); loadAdminEmployees(); }
+    if (d.success) { showToast('Auth set up. Default password: ' + d.defaultPassword, 'success'); searchEmployee(); }
     else showToast(d.error || 'Failed to setup auth', 'error');
   } catch(err) { showToast('Network error', 'error'); }
 }
 
+function showAddEmpForm() {
+  document.getElementById('addEmpForm').classList.remove('hidden');
+  document.getElementById('addEmpToggleBtn').classList.add('hidden');
+  ['addEmpCode','addEmpName','addEmpDesignation','addEmpMobile','addEmpStoreName','addEmpStoreCode','addEmpPwd'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('addEmpRole').value = 'employee';
 }
 function hideAddEmpForm() {
